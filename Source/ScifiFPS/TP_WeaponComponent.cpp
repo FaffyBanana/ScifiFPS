@@ -15,6 +15,9 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 {
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
+
+	// Default line trace distance
+	ShootingDistance = 2000.0f;
 }
 
 
@@ -35,6 +38,37 @@ void UTP_WeaponComponent::Fire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
 	}
+
+	RaycastShot();
+
+}
+
+void UTP_WeaponComponent::RaycastShot()
+{
+	// Create variables for line trace
+	FVector loc;
+	FRotator rot;
+	FHitResult hit;
+
+	// Get players POV
+	Character->GetController()->GetPlayerViewPoint(loc, rot);
+
+	// Set variables
+	FVector start = loc;
+	FVector end = start + (rot.Vector() * ShootingDistance);
+
+	// Send line trace
+	FCollisionQueryParams traceParams;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, traceParams);
+
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 2.0f); // DEBUG -----------------------
+
+	// If line trace has hit an object
+	if(bHit)
+	{
+		DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
+	}
+	
 }
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)

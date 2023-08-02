@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
+	/** Line trace distance (how far the player can shoot)*/
+	float ShootingDistance;
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputMappingContext* FireMappingContext;
@@ -49,6 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
 
+	/* Send a line trace for raycast shooting */
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void RaycastShot();
+
 protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()
@@ -57,4 +64,6 @@ protected:
 private:
 	/** The Character holding this weapon*/
 	AScifiFPSCharacter* Character;
+
+
 };
