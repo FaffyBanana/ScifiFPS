@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "TP_WeaponComponent.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -38,6 +39,9 @@ class AScifiFPSCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UTP_WeaponComponent* WeaponComponent;
 
 	
 public:

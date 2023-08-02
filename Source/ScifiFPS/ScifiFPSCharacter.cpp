@@ -35,6 +35,10 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Create a weapon component 
+	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
+	WeaponComponent->SetupAttachment(GetCapsuleComponent());
+
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -42,7 +46,7 @@ void AScifiFPSCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	//Add Input Mapping Context
+	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -51,6 +55,11 @@ void AScifiFPSCharacter::BeginPlay()
 		}
 	}
 
+	// Attach weapon to player
+	if (WeaponComponent)
+	{
+		WeaponComponent->AttachWeapon(this);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
