@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "HealthComponent.h"
 #include "EnemyAIManager.generated.h"
 UCLASS()
 class SCIFIFPS_API AEnemyAIManager : public ACharacter
@@ -27,6 +28,8 @@ public:
 
 	// Update how fast the enemy can walk/run
 	void UpdateMaxWalkSpeed(float speed);
+
+	void ShootPlayer();
 
 public:
 	UPROPERTY(EditAnywhere, Category = "AI")

@@ -1,4 +1,6 @@
 #include "EnemyAIManager.h"
+#include "ScifiFPSCharacter.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AEnemyAIManager::AEnemyAIManager()
@@ -30,4 +32,13 @@ void AEnemyAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void AEnemyAIManager::UpdateMaxWalkSpeed(float speed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = speed;
+}
+
+void AEnemyAIManager::ShootPlayer()
+{
+	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if(player)
+	{
+		player->GetHealthComponent()->TakeDamage();
+	}
 }

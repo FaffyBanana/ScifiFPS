@@ -39,6 +39,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
 	WeaponComponent->SetupAttachment(GetCapsuleComponent());
 
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -116,4 +117,9 @@ void AScifiFPSCharacter::SetHasRifle(bool bNewHasRifle)
 bool AScifiFPSCharacter::GetHasRifle()
 {
 	return bHasRifle;
+}
+
+UHealthComponent* AScifiFPSCharacter::GetHealthComponent()
+{
+	return HealthComponent;
 }

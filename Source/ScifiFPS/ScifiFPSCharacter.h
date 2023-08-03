@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "TP_WeaponComponent.h"
+#include "HealthComponent.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -40,9 +41,11 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* WeaponComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	UHealthComponent* HealthComponent;
 	
 public:
 	AScifiFPSCharacter();
@@ -67,6 +70,8 @@ public:
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
+
+	UHealthComponent* GetHealthComponent();
 
 protected:
 	/** Called for movement input */

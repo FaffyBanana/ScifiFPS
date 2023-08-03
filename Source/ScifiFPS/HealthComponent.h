@@ -30,6 +30,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetMaxHealth();
 
+	UFUNCTION(BlueprintCallable)
+	void TakeDamage();
+
 private:
 	int m_health;
 	int m_maxHealth;

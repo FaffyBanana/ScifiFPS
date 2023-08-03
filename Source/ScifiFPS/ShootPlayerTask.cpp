@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ChasePlayerTask.h"
+#include "ShootPlayerTask.h"
 #include "EnemyAIController.h"
 #include "EnemyAIManager.h"
 
-EBTNodeResult::Type UChasePlayerTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UShootPlayerTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     AEnemyAIController* enemyController = Cast<AEnemyAIController>(OwnerComp.GetAIOwner());
 
@@ -14,11 +14,10 @@ EBTNodeResult::Type UChasePlayerTask::ExecuteTask(UBehaviorTreeComponent& OwnerC
         AEnemyAIManager* enemyManager = Cast<AEnemyAIManager>(enemyController->GetPawn());
         if (enemyManager)
         {
-            enemyManager->UpdateMaxWalkSpeed(600.0f);
+            enemyManager->ShootPlayer();
             return EBTNodeResult::Succeeded;
         }
     }
 
     return EBTNodeResult::Failed;
-
 }
