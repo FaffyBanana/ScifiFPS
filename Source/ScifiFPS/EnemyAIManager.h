@@ -31,7 +31,13 @@ public:
 
 	void ShootPlayer();
 
+	UHealthComponent* GetHealthComponent();
+
+	void Death();
 public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviourTree;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	UHealthComponent* HealthComponent;
 };

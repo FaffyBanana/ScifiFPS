@@ -7,7 +7,7 @@
 #include <Kismet/GameplayStatics.h>
 
 AEnemyAIController::AEnemyAIController()
-	:m_sightRadius(1000.0f)
+	:m_sightRadius(3000.0f)
 	,m_loseSightRadius(1500.0f)
 	,m_peripheralVisionAngleDegrees(35.0f)
 {

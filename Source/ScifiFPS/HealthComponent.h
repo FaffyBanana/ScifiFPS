@@ -33,6 +33,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TakeDamage();
 
+	UFUNCTION(BlueprintCallable)
+	void ResetHealth();
+
+	UHealthComponent* GetHealthComponent();
+
 private:
 	int m_health;
 	int m_maxHealth;

@@ -9,6 +9,8 @@ AEnemyAIManager::AEnemyAIManager()
 	PrimaryActorTick.bCanEverTick = true;
 
 	UpdateMaxWalkSpeed(120.0f);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -21,6 +23,11 @@ void AEnemyAIManager::BeginPlay()
 void AEnemyAIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (HealthComponent->GetHealth() <= 0)
+	{
+		Death();
+	}
 }
 
 // Called to bind functionality to input
@@ -41,4 +48,14 @@ void AEnemyAIManager::ShootPlayer()
 	{
 		player->GetHealthComponent()->TakeDamage();
 	}
+}
+
+UHealthComponent* AEnemyAIManager::GetHealthComponent()
+{
+	return HealthComponent;
+}
+
+void AEnemyAIManager::Death()
+{
+	Destroy();
 }

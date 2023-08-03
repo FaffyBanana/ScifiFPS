@@ -30,7 +30,7 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	
 }
 
 int UHealthComponent::GetHealth()
@@ -50,5 +50,15 @@ void UHealthComponent::TakeDamage()
 		m_health -= 20;
 	}
 
+}
+
+void UHealthComponent::ResetHealth()
+{
+	m_health = m_maxHealth;
+}
+
+UHealthComponent* UHealthComponent::GetHealthComponent()
+{
+	return nullptr;
 }
 

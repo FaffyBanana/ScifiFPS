@@ -5,6 +5,8 @@
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include <Kismet/GameplayStatics.h>
+#include "GameFramework/GameModeBase.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -14,6 +16,9 @@
 
 AScifiFPSCharacter::AScifiFPSCharacter()
 {
+
+	PrimaryActorTick.bCanEverTick = true;
+
 	// Character doesnt have a rifle at start
 	bHasRifle = false;
 	
@@ -80,6 +85,23 @@ void AScifiFPSCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AScifiFPSCharacter::Look);
 	}
+}
+
+void AScifiFPSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if(HealthComponent->GetHealth() <= 0)
+	{
+		Respawn();
+	}
+}
+
+void AScifiFPSCharacter::Respawn()
+{
+	HealthComponent->ResetHealth();
+	
+	GetWorld()->GetAuthGameMode()->RestartPlayer(GetWorld()->GetFirstPlayerController());
 }
 
 

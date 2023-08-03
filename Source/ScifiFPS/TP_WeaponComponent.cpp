@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "EnemyAIManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -64,9 +65,15 @@ void UTP_WeaponComponent::RaycastShot()
 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 2.0f); // DEBUG -----------------------
 
 	// If line trace has hit an object
-	if(bHit)
+	if (bHit)
 	{
-		DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
+		AEnemyAIManager* enemyManager = Cast<AEnemyAIManager>(hit.GetActor());
+		if (enemyManager)
+		{
+			enemyManager->GetHealthComponent()->TakeDamage();
+			//DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
+		}
+
 	}
 	
 }
