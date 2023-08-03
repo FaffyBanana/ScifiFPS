@@ -45,11 +45,10 @@ int UHealthComponent::GetMaxHealth()
 
 void UHealthComponent::TakeDamage()
 {
-	if(m_health >= 0)
+	if(m_health > 0)
 	{
 		m_health -= 20;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::FromInt(m_health));
 
 }
 
