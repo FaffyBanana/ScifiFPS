@@ -54,7 +54,7 @@ UBlackboardComponent* AEnemyAIController::GetBlackboardComp() const
 
 void AEnemyAIController::OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAIStimulus Stimulus)
 {
-	if(Actor->ActorHasTag("Player") && Stimulus.WasSuccessfullySensed())
+	if (Actor->ActorHasTag("Player") && Stimulus.WasSuccessfullySensed())
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Player Detected"));
 		GetWorldTimerManager().ClearTimer(m_enemyTimer);
@@ -74,9 +74,9 @@ void AEnemyAIController::OnPossess(APawn* pawn)
 
 	AEnemyAIManager* enemyManager = Cast<AEnemyAIManager>(pawn);
 
-	if(enemyManager)
+	if (enemyManager)
 	{
-		if(enemyManager->BehaviourTree->BlackboardAsset)
+		if (enemyManager->BehaviourTree->BlackboardAsset)
 		{
 			BlackboardComp->InitializeBlackboard(*(enemyManager->BehaviourTree->BlackboardAsset));
 		}
@@ -87,7 +87,7 @@ void AEnemyAIController::OnPossess(APawn* pawn)
 void AEnemyAIController::OnUpdated()
 {
 	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if(player)
+	if (player)
 	{
 		UAIPerceptionSystem::RegisterPerceptionStimuliSource(this, SightConfig->GetSenseImplementation(), this);
 	}
