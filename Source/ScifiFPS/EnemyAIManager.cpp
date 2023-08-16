@@ -10,19 +10,38 @@ AEnemyAIManager::AEnemyAIManager()
 
 	UpdateMaxWalkSpeed(120.0f);
 
+	// Create a weapon component 
+	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
+	WeaponComponent->SetupAttachment(GetMesh());
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	ShotPercentage = 1;
 }
 
 // Called when the game starts or when spawned
 void AEnemyAIManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Attach weapon to player
+	if (WeaponComponent)
+	{
+		//WeaponComponent->AttachWeapon(GetMesh()); 
+	}
+}
+
+bool AEnemyAIManager::ShotHitChance(int percentage)
+{
+	return (FMath::RandRange(1, 100/percentage) == 1 ? true : false);
 }
 
 // Called every frame
 void AEnemyAIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
 
 	if (HealthComponent->GetHealth() <= 0)
 	{
@@ -43,11 +62,15 @@ void AEnemyAIManager::UpdateMaxWalkSpeed(float speed)
 
 void AEnemyAIManager::ShootPlayer()
 {
-	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if(player)
+	if(ShotHitChance(ShotPercentage))
 	{
-		player->GetHealthComponent()->TakeDamage();
+		AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		if (player)
+		{
+			player->GetHealthComponent()->TakeDamage();
+		}
 	}
+	
 }
 
 UHealthComponent* AEnemyAIManager::GetHealthComponent()

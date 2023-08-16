@@ -56,6 +56,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RaycastShot();
 
+
+
 protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()

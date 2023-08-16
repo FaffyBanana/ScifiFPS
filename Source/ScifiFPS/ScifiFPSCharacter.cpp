@@ -45,6 +45,13 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	WeaponComponent->SetupAttachment(GetCapsuleComponent());
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+	/* Find BP widget */
+	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/FirstPerson/UI/WBP_Gameover"));
+	if (GameOverWidgetClassFinder.Class)
+	{
+		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
+	}
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -93,7 +100,11 @@ void AScifiFPSCharacter::Tick(float DeltaTime)
 
 	if(HealthComponent->GetHealth() <= 0)
 	{
-		Respawn();
+		if(GameOverWidgetClass)
+		{
+			GameOverWidget = CreateWidget<UUserWidget>(GetGameInstance(), GameOverWidgetClass);
+			GameOverWidget->AddToViewport();
+		}
 	}
 }
 

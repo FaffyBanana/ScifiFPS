@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "TP_WeaponComponent.h"
 #include "HealthComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -73,6 +74,11 @@ public:
 
 	UHealthComponent* GetHealthComponent();
 
+	UFUNCTION(BlueprintCallable)
+	void Respawn();
+
+	
+
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -93,7 +99,11 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	
+
 private:
-	void Respawn();
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+	UUserWidget* GameOverWidget;
 };
 
