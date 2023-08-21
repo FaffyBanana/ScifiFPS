@@ -19,6 +19,9 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	// Default line trace distance
 	ShootingDistance = 2000.0f;
+
+	// Set time between shots
+	TimeBetweenShots = 0.15f;
 }
 
 
@@ -105,9 +108,23 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::StartFire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
+
 		}
 	}
+}
+
+void UTP_WeaponComponent::StartFire()
+{
+	Fire();
+	Character->GetWorldTimerManager().SetTimer(m_handleRefire, this, &UTP_WeaponComponent::Fire, TimeBetweenShots, true);
+}
+
+void UTP_WeaponComponent::StopFire()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Stop shooting"));
+	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

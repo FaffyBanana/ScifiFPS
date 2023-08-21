@@ -26,6 +26,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
 
+	/* Seconds to wait between shots */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float TimeBetweenShots;
+
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
@@ -48,9 +52,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
 
+
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void StartFire();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void StopFire();
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
+
+
 
 	/* Send a line trace for raycast shooting */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
@@ -66,6 +80,9 @@ protected:
 private:
 	/** The Character holding this weapon*/
 	AScifiFPSCharacter* Character;
+
+	/* Shooting timer handle */
+	FTimerHandle m_handleRefire;
 
 
 };
