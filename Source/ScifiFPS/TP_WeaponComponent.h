@@ -34,6 +34,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	FVector MuzzleOffset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	/* Is currently equipped gun automatic */
+	bool IsAutomatic;
+
 	/** Line trace distance (how far the player can shoot)*/
 	float ShootingDistance;
 
@@ -45,6 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* SwitchAmmoAction;
+
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
@@ -53,22 +60,23 @@ public:
 	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
 
 
-
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void StartFire();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void StopFire();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SwitchAmmoType();
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
 
-
-
 	/* Send a line trace for raycast shooting */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RaycastShot();
+
 
 
 
@@ -84,5 +92,6 @@ private:
 	/* Shooting timer handle */
 	FTimerHandle m_handleRefire;
 
+	
 
 };
