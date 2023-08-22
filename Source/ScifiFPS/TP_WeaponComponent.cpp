@@ -123,7 +123,6 @@ void UTP_WeaponComponent::StartFire()
 
 void UTP_WeaponComponent::StopFire()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Stop shooting"));
 	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
 }
 
