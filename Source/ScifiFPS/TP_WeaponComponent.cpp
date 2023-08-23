@@ -22,6 +22,8 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	// Set time between shots
 	TimeBetweenShots = 0.15f;
+
+	IsAutomatic = true;
 }
 
 
@@ -110,6 +112,8 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::StartFire);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
+			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
+
 
 		}
 	}
@@ -117,14 +121,30 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 
 void UTP_WeaponComponent::StartFire()
 {
+	/* Fire weapon */
 	Fire();
-	Character->GetWorldTimerManager().SetTimer(m_handleRefire, this, &UTP_WeaponComponent::Fire, TimeBetweenShots, true);
+
+	if(IsAutomatic)
+	{
+		/* Automatic shooting timer */
+		Character->GetWorldTimerManager().SetTimer(m_handleRefire, this, &UTP_WeaponComponent::Fire, TimeBetweenShots, true);
+	}
 }
 
 void UTP_WeaponComponent::StopFire()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Stop shooting"));
-	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
+	if(IsAutomatic)
+		/* Clear automatic shooting timer */
+		Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
+}
+
+void UTP_WeaponComponent::SwitchAmmoType()
+{
+	StopFire();
+	IsAutomatic = !IsAutomatic;
+
+	IsAutomatic ? GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic On")) : GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic Off"));
+	
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
