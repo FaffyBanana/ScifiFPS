@@ -8,6 +8,7 @@
 #include "TP_WeaponComponent.h"
 #include "HealthComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "InventoryComponent.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -48,6 +49,9 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
+	UInventoryComponent* InventoryComponent;
+
 public:
 	AScifiFPSCharacter();
 

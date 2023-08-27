@@ -23,7 +23,10 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	// Set time between shots
 	TimeBetweenShots = 0.15f;
 
+	/* Weapon defaults */
 	IsAutomatic = true;
+	AssaultRifleActive = true;
+
 }
 
 
@@ -46,6 +49,18 @@ void UTP_WeaponComponent::Fire()
 	}
 
 	RaycastShot();
+
+	if (InventoryComponent)
+	{
+		if (AssaultRifleActive)
+		{
+			if
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo()));
+			InventoryComponent->ConsumeAssaultRifleAmmo();
+		}
+	}
+
+	
 
 }
 
@@ -83,6 +98,13 @@ void UTP_WeaponComponent::RaycastShot()
 	
 }
 
+void UTP_WeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
+}
+
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 {
 	Character = TargetCharacter;
@@ -110,7 +132,7 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::StartFire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
 			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
 
@@ -123,6 +145,8 @@ void UTP_WeaponComponent::StartFire()
 {
 	/* Fire weapon */
 	Fire();
+	
+	
 
 	if(IsAutomatic)
 	{
