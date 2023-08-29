@@ -42,10 +42,12 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 
 	// Create a weapon component 
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
-	WeaponComponent->SetupAttachment(GetCapsuleComponent());
+	//WeaponComponent->GunArray.SetupAttachment(GetCapsuleComponent());
 
+	// Create health component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
+	// Create inventory component
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
 	/* Find BP widget */
@@ -54,6 +56,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	{
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
+
 }
 
 void AScifiFPSCharacter::BeginPlay()

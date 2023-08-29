@@ -27,6 +27,17 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	IsAutomatic = true;
 	AssaultRifleActive = true;
 
+	m_weaponIndex = 0;
+
+	PrimaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
+	SecondaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+
+	GunArray.Add(PrimaryWeapon);
+	GunArray.Add(SecondaryWeapon);
+
+	
+
+
 }
 
 
@@ -97,6 +108,63 @@ void UTP_WeaponComponent::RaycastShot()
 	
 }
 
+void UTP_WeaponComponent::SwitchWeapons(int index)
+{
+	// Set gun actors as invisible
+	for (int i =0; i < GunArray.Num(); i++)
+	{
+		GunArray[i]->SetVisibility(false);
+	}
+
+	// Set current weapon to be visible
+	GunArray[m_weaponIndex]->SetVisibility(true);
+
+	// Set attachment
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+
+}
+
+void UTP_WeaponComponent::SwitchToNextWeapon()
+{
+	switch (m_weaponIndex)
+	{
+	case 0:
+		if (GunArray.Num() > 1)
+		{
+			m_weaponIndex = 1;
+			SwitchWeapons(m_weaponIndex);
+		}
+		break;
+
+	case 1:
+		if (GunArray.Num() > 2)
+		{
+			m_weaponIndex = 2;
+			SwitchWeapons(m_weaponIndex);
+		}
+		else
+		{
+			m_weaponIndex = 0;
+			SwitchWeapons(m_weaponIndex);
+		}
+		break;
+
+	case 2:
+		if (GunArray.Num() > 3)
+		{
+			m_weaponIndex = 3;
+			SwitchWeapons(m_weaponIndex);
+		}
+		else
+		{
+			m_weaponIndex = 0;
+			SwitchWeapons(m_weaponIndex);
+		}
+		break;
+	}
+}
+
 void UTP_WeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -114,8 +182,10 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	
+	//PrimaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	//SecondaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	/* Maybe attach child actor componnents here ------------- */
+
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	Character->SetHasRifle(true);
 
@@ -134,8 +204,7 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
 			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
-
-
+			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchToNextWeapon);
 		}
 	}
 }

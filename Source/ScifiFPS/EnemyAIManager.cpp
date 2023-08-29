@@ -10,9 +10,6 @@ AEnemyAIManager::AEnemyAIManager()
 
 	UpdateMaxWalkSpeed(120.0f);
 
-	// Create a weapon component 
-	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
-	WeaponComponent->SetupAttachment(GetMesh());
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
@@ -25,10 +22,10 @@ void AEnemyAIManager::BeginPlay()
 	Super::BeginPlay();
 
 	// Attach weapon to player
-	if (WeaponComponent)
-	{
-		//WeaponComponent->AttachWeapon(GetMesh()); 
-	}
+	//if (WeaponComponent)
+	//{
+	//	//WeaponComponent->AttachWeapon(GetMesh()); 
+	//}
 }
 
 bool AEnemyAIManager::ShotHitChance(int percentage)

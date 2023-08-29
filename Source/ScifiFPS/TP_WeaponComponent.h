@@ -5,12 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "InventoryComponent.h"
+#include "Components/ChildActorComponent.h"
+#include "GunBase.h"
 #include "TP_WeaponComponent.generated.h"
 
 class AScifiFPSCharacter;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SCIFIFPS_API UTP_WeaponComponent : public USkeletalMeshComponent
+class SCIFIFPS_API UTP_WeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -40,7 +42,7 @@ public:
 	bool IsAutomatic;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	/* Is currently equipped gun automatic */
+	/* Is the assault rifle the current weapon */
 	bool AssaultRifleActive;
 
 	/** Line trace distance (how far the player can shoot)*/
@@ -57,8 +59,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* SwitchAmmoAction;
 
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* SwitchWeaponsAction;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TArray<UChildActorComponent*> GunArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	class UChildActorComponent* PrimaryWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	class UChildActorComponent* SecondaryWeapon;
 
 public:
 	/** Sets default values for this component's properties */
@@ -85,6 +100,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void RaycastShot();
 
+	UFUNCTION()
+	void SwitchWeapons(int index);
+
+	void SwitchToNextWeapon();
+
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -103,6 +123,7 @@ private:
 	/* Automatic weapon ammo counter */
 	int m_automaticGunAmmoCount;
 
-	
+	/* Index for the gun the character is currently using */
+	int m_weaponIndex;
 
 };
