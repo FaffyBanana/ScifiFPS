@@ -54,7 +54,6 @@ void UTP_WeaponComponent::Fire()
 	{
 		if (AssaultRifleActive)
 		{
-			if
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo()));
 			InventoryComponent->ConsumeAssaultRifleAmmo();
 		}

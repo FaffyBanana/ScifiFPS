@@ -7,12 +7,6 @@
 #include "InventoryComponent.h"
 #include "TP_WeaponComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EWeaponType: UINT
-{
-
-};
-
 class AScifiFPSCharacter;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
