@@ -24,12 +24,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetAssaultRifleAmmo(int ammoCount);
+	void SetAssaultRifleAmmo(const uint32 ammoCount);
 
-	int GetAssaultRifleAmmo();
+	int GetAssaultRifleAmmo() const;
 
-	void ConsumeAssaultRifleAmmo();
+	void ConsumeAssaultRifleAmmo() const;
+
 private:
-	int m_assaultRifleAmmoCount;
+	mutable uint32 m_assaultRifleAmmoCount;
 		
 };

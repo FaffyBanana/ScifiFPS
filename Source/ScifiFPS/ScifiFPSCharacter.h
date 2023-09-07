@@ -59,7 +59,6 @@ protected:
 	virtual void BeginPlay();
 
 public:
-		
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
@@ -70,13 +69,14 @@ public:
 
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void SetHasRifle(bool bNewHasRifle);
+	void SetHasRifle(const bool bNewHasRifle);
 
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	bool GetHasRifle();
+	bool GetHasRifle() const;
 
-	UHealthComponent* GetHealthComponent();
+	/* Return Health Component */
+	UHealthComponent* GetHealthComponent() const;
 
 	UFUNCTION(BlueprintCallable)
 	void Respawn();
@@ -102,12 +102,11 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
 	
 
 private:
+	/* Game Over Menu */
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
-
 	UUserWidget* GameOverWidget;
 };
 

@@ -21,7 +21,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	bool ShotHitChance(int percentage); // Chance of shot being hit
+	bool ShotHitChance(const uint32 percentage) const; // Chance of shot being hit
 
 public:
 	// Called every frame
@@ -31,11 +31,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Update how fast the enemy can walk/run
-	void UpdateMaxWalkSpeed(float speed);
+	void UpdateMaxWalkSpeed(const float speed);
 
 	void ShootPlayer();
 
-	UHealthComponent* GetHealthComponent();
+	UHealthComponent* GetHealthComponent() const;
 
 	void Death();
 public:
@@ -45,7 +45,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
 
-
 	UPROPERTY(EditAnywhere)
-	int ShotPercentage;
+	uint32 ShotPercentage;
 };

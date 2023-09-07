@@ -10,7 +10,6 @@ AEnemyAIManager::AEnemyAIManager()
 
 	UpdateMaxWalkSpeed(120.0f);
 
-
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	ShotPercentage = 1;
@@ -28,7 +27,7 @@ void AEnemyAIManager::BeginPlay()
 	//}
 }
 
-bool AEnemyAIManager::ShotHitChance(int percentage)
+bool AEnemyAIManager::ShotHitChance(const uint32 percentage) const
 {
 	return (FMath::RandRange(1, 100/percentage) == 1 ? true : false);
 }
@@ -37,8 +36,6 @@ bool AEnemyAIManager::ShotHitChance(int percentage)
 void AEnemyAIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
 
 	if (HealthComponent->GetHealth() <= 0)
 	{
@@ -52,14 +49,14 @@ void AEnemyAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AEnemyAIManager::UpdateMaxWalkSpeed(float speed)
+void AEnemyAIManager::UpdateMaxWalkSpeed(const float speed)
 {
 	GetCharacterMovement()->MaxWalkSpeed = speed;
 }
 
 void AEnemyAIManager::ShootPlayer()
 {
-	if(ShotHitChance(ShotPercentage))
+	if (ShotHitChance(ShotPercentage))
 	{
 		AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		if (player)
@@ -70,7 +67,7 @@ void AEnemyAIManager::ShootPlayer()
 	
 }
 
-UHealthComponent* AEnemyAIManager::GetHealthComponent()
+UHealthComponent* AEnemyAIManager::GetHealthComponent() const
 {
 	return HealthComponent;
 }

@@ -50,7 +50,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	// Create inventory component
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
-	/* Find BP widget */
+	///* Find BP widget */
 	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/FirstPerson/UI/WBP_Gameover"));
 	if (GameOverWidgetClassFinder.Class)
 	{
@@ -103,9 +103,9 @@ void AScifiFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(HealthComponent->GetHealth() <= 0)
+	if (HealthComponent->GetHealth() <= 0)
 	{
-		if(GameOverWidgetClass)
+		if (GameOverWidgetClass)
 		{
 			GameOverWidget = CreateWidget<UUserWidget>(GetGameInstance(), GameOverWidgetClass);
 			GameOverWidget->AddToViewport();
@@ -147,17 +147,17 @@ void AScifiFPSCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AScifiFPSCharacter::SetHasRifle(bool bNewHasRifle)
+void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
 }
 
-bool AScifiFPSCharacter::GetHasRifle()
+bool AScifiFPSCharacter::GetHasRifle() const
 {
 	return bHasRifle;
 }
 
-UHealthComponent* AScifiFPSCharacter::GetHealthComponent()
+UHealthComponent* AScifiFPSCharacter::GetHealthComponent() const
 {
 	return HealthComponent;
 }

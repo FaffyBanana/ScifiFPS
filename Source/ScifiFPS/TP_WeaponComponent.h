@@ -67,13 +67,19 @@ public:
 	UInventoryComponent* InventoryComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	TArray<UChildActorComponent*> GunArray;
+	TArray<AGunBase*> GunArray;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	class UChildActorComponent* PrimaryWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	class UChildActorComponent* SecondaryWeapon;
+	class UChildActorComponent* SecondaryWeapon;*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TSubclassOf<AGunBase> PrimaryGun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TSubclassOf<AGunBase> SecondaryGun;
 
 public:
 	/** Sets default values for this component's properties */
@@ -101,7 +107,7 @@ public:
 	void RaycastShot();
 
 	UFUNCTION()
-	void SwitchWeapons(int index);
+	void SwitchWeapons(uint32 index);
 
 	void SwitchToNextWeapon();
 
@@ -121,9 +127,9 @@ private:
 	FTimerHandle m_handleRefire;
 
 	/* Automatic weapon ammo counter */
-	int m_automaticGunAmmoCount;
+	uint32 m_automaticGunAmmoCount;
 
 	/* Index for the gun the character is currently using */
-	int m_weaponIndex;
+	uint32 m_weaponIndex;
 
 };

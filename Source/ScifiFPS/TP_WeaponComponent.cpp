@@ -29,14 +29,21 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	m_weaponIndex = 0;
 
-	PrimaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
-	SecondaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+	////PrimaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
+	//if (PrimaryWeapon && PrimaryGun)
+	//{
+	//	PrimaryWeapon->SetChildActorClass(PrimaryGun);
+	//}
 
-	GunArray.Add(PrimaryWeapon);
-	GunArray.Add(SecondaryWeapon);
+	////SecondaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+	//if (SecondaryWeapon && SecondaryGun)
+	//{
+	//	SecondaryWeapon->SetChildActorClass(SecondaryGun);
+	//}
 
-	
-
+	GunArray.Init(0,2);
+	GunArray.Add(PrimaryGun.GetDefaultObject());
+	GunArray.Add(SecondaryGun.GetDefaultObject());
 
 }
 
@@ -69,8 +76,6 @@ void UTP_WeaponComponent::Fire()
 			InventoryComponent->ConsumeAssaultRifleAmmo();
 		}
 	}
-
-	
 
 }
 
@@ -108,16 +113,18 @@ void UTP_WeaponComponent::RaycastShot()
 	
 }
 
-void UTP_WeaponComponent::SwitchWeapons(int index)
+void UTP_WeaponComponent::SwitchWeapons(uint32 index)
 {
 	// Set gun actors as invisible
 	for (int i =0; i < GunArray.Num(); i++)
 	{
-		GunArray[i]->SetVisibility(false);
+		
+		GunArray[i]->SetActorHiddenInGame(true);
+		
 	}
 
 	// Set current weapon to be visible
-	GunArray[m_weaponIndex]->SetVisibility(true);
+	GunArray[m_weaponIndex]->SetActorHiddenInGame(false);
 
 	// Set attachment
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
@@ -129,6 +136,7 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 {
 	switch (m_weaponIndex)
 	{
+	/* Primary Weapon */
 	case 0:
 		if (GunArray.Num() > 1)
 		{
@@ -136,7 +144,8 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 			SwitchWeapons(m_weaponIndex);
 		}
 		break;
-
+	
+	/* Secondary Weapon*/
 	case 1:
 		if (GunArray.Num() > 2)
 		{
@@ -150,6 +159,7 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 		}
 		break;
 
+	/* Tertiary Weapon */
 	case 2:
 		if (GunArray.Num() > 3)
 		{
@@ -214,18 +224,14 @@ void UTP_WeaponComponent::StartFire()
 	/* Fire weapon */
 	Fire();
 	
-	
-
-	if(IsAutomatic)
-	{
+	if (IsAutomatic)
 		/* Automatic shooting timer */
 		Character->GetWorldTimerManager().SetTimer(m_handleRefire, this, &UTP_WeaponComponent::Fire, TimeBetweenShots, true);
-	}
 }
 
 void UTP_WeaponComponent::StopFire()
 {
-	if(IsAutomatic)
+	if (IsAutomatic)
 		/* Clear automatic shooting timer */
 		Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
 }
@@ -235,7 +241,7 @@ void UTP_WeaponComponent::SwitchAmmoType()
 	StopFire();
 	IsAutomatic = !IsAutomatic;
 
-	IsAutomatic ? GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic On")) : GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic Off"));
+	//IsAutomatic ? GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic On")) : GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic Off"));
 	
 }
 
