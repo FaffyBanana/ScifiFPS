@@ -19,6 +19,8 @@ public:
 	// Sets default values for this actor's properties
 	AGunBase();
 
+	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

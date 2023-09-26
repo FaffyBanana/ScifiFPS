@@ -10,6 +10,13 @@ AGunBase::AGunBase()
 	PrimaryActorTick.bCanEverTick = false;
 
 	GunSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMeshComponent"));
+
+	SetRootComponent(GunSkeletalMeshComponent);
+}
+
+USkeletalMeshComponent* AGunBase::GetGunSkeletalMeshComponent() const
+{
+	return GunSkeletalMeshComponent;
 }
 
 // Called when the game starts or when spawned

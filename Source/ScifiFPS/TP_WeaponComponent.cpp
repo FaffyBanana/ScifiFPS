@@ -10,6 +10,7 @@
 #include "EnemyAIManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include <Kismet/KismetMathLibrary.h>
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
@@ -29,24 +30,58 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	m_weaponIndex = 0;
 
-	////PrimaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
-	//if (PrimaryWeapon && PrimaryGun)
-	//{
-	//	PrimaryWeapon->SetChildActorClass(PrimaryGun);
-	//}
+	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryGun"));
+	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryGun"));
 
-	////SecondaryWeapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
-	//if (SecondaryWeapon && SecondaryGun)
-	//{
-	//	SecondaryWeapon->SetChildActorClass(SecondaryGun);
-	//}
-
-	GunArray.Init(0,2);
-	GunArray.Add(PrimaryGun.GetDefaultObject());
-	GunArray.Add(SecondaryGun.GetDefaultObject());
-
+	GunArray.Add(PrimaryGun);
+	GunArray.Add(SecondaryGun);
 }
 
+void UTP_WeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
+}
+
+void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
+{
+	Character = TargetCharacter;
+	if (Character == nullptr)
+	{
+		return;
+	}
+
+	// Attach the weapon to the First Person Character
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	//PrimaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	//SecondaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	/* Maybe attach child actor componnents here ------------- */
+
+	//SwitchWeapons(0);
+
+	// switch bHasRifle so the animation blueprint can switch to another animation set
+	Character->SetHasRifle(true);
+
+	// Set up action bindings
+	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
+			Subsystem->AddMappingContext(FireMappingContext, 1);
+		}
+
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			// Fire
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
+			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
+			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchWeapons);
+		}
+	}
+}
 
 void UTP_WeaponComponent::Fire()
 {
@@ -72,7 +107,7 @@ void UTP_WeaponComponent::Fire()
 	{
 		if (AssaultRifleActive)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo()));
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo()));
 			InventoryComponent->ConsumeAssaultRifleAmmo();
 		}
 	}
@@ -113,27 +148,30 @@ void UTP_WeaponComponent::RaycastShot()
 	
 }
 
-void UTP_WeaponComponent::SwitchWeapons(uint32 index)
+void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
-	// Set gun actors as invisible
-	for (int i =0; i < GunArray.Num(); i++)
-	{
-		
-		GunArray[i]->SetActorHiddenInGame(true);
-		
-	}
-
-	// Set current weapon to be visible
-	GunArray[m_weaponIndex]->SetActorHiddenInGame(false);
-
-	// Set attachment
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	int tempValue = UKismetMathLibrary::FTrunc(index);
+	int tempWeaponIndex = tempValue = m_weaponIndex;
 
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
+
+	//// Set gun actors as invisible
+	//for (int i = 0; i < GunArray.Num(); i++)
+	//{
+
+	//	GunArray[i]->SetVisibility(false);
+	//}
+
+	//// Set current weapon to be visible
+	//GunArray[m_weaponIndex]->SetVisibility(true);
+
+	//// Set attachment
+	//FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	//GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+
 	switch (m_weaponIndex)
 	{
 	/* Primary Weapon */
@@ -172,52 +210,21 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 			SwitchWeapons(m_weaponIndex);
 		}
 		break;
+
+	default:
+		break;
 	}
 }
 
-void UTP_WeaponComponent::BeginPlay()
-{
-	Super::BeginPlay();
+/* WeaponChange(index)
+* int tempIndex = index +1;
+	if(GunArray.Num() > tempIndex)
+		m_weaponIndex = tempIndex;
+		SwitchWeapons(m_weaponIndex);
+	*/
 
-	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
-}
 
-void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
-{
-	Character = TargetCharacter;
-	if (Character == nullptr)
-	{
-		return;
-	}
 
-	// Attach the weapon to the First Person Character
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	//PrimaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	//SecondaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	/* Maybe attach child actor componnents here ------------- */
-
-	// switch bHasRifle so the animation blueprint can switch to another animation set
-	Character->SetHasRifle(true);
-
-	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-			Subsystem->AddMappingContext(FireMappingContext, 1);
-		}
-
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
-		{
-			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
-			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
-			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchToNextWeapon);
-		}
-	}
-}
 
 void UTP_WeaponComponent::StartFire()
 {
