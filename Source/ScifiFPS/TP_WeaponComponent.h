@@ -66,8 +66,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	TArray<UChildActorComponent*> GunArray;
+	
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	class UChildActorComponent* PrimaryGun;
@@ -131,5 +131,7 @@ private:
 
 	/* Index for the gun the character is currently using */
 	uint32 m_weaponIndex;
+
+	TArray<UChildActorComponent*> GunArray;
 
 };

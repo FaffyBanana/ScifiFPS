@@ -30,11 +30,9 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	m_weaponIndex = 0;
 
-	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryGun"));
-	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryGun"));
-
-	GunArray.Add(PrimaryGun);
-	GunArray.Add(SecondaryGun);
+	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
+	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+	
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -42,6 +40,14 @@ void UTP_WeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
+
+	if (PrimaryGun)
+		GunArray.Add(PrimaryGun);
+
+	if (SecondaryGun)
+		GunArray.Add(SecondaryGun);
+
+	//SwitchToNextWeapon();
 }
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
@@ -52,13 +58,9 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 		return;
 	}
 
-	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	//PrimaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	//SecondaryWeapon->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	/* Maybe attach child actor componnents here ------------- */
-
-	//SwitchWeapons(0);
+	PrimaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	SecondaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	Character->SetHasRifle(true);
@@ -150,70 +152,79 @@ void UTP_WeaponComponent::RaycastShot()
 
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
-	int tempValue = UKismetMathLibrary::FTrunc(index);
-	int tempWeaponIndex = tempValue = m_weaponIndex;
+	float tempIndex = index.Get<float>();
+	int tempValue = UKismetMathLibrary::FTrunc(tempIndex);
+	int tempWeaponIndex = tempValue + m_weaponIndex;
+
+	if (GunArray.IsValidIndex(tempWeaponIndex))
+	{
+		m_weaponIndex = tempWeaponIndex;
+	}
+	else
+	{
+		m_weaponIndex < 0 ? m_weaponIndex = GunArray.Num() - 1 : m_weaponIndex = 0;
+	}
+	SwitchToNextWeapon();
 
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
-
-	//// Set gun actors as invisible
-	//for (int i = 0; i < GunArray.Num(); i++)
-	//{
-
-	//	GunArray[i]->SetVisibility(false);
-	//}
-
-	//// Set current weapon to be visible
-	//GunArray[m_weaponIndex]->SetVisibility(true);
-
-	//// Set attachment
-	//FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	//GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-
-	switch (m_weaponIndex)
+	// Set gun actors as invisible
+	for (int i = 0; i < GunArray.Num(); i++)
 	{
-	/* Primary Weapon */
-	case 0:
-		if (GunArray.Num() > 1)
-		{
-			m_weaponIndex = 1;
-			SwitchWeapons(m_weaponIndex);
-		}
-		break;
-	
-	/* Secondary Weapon*/
-	case 1:
-		if (GunArray.Num() > 2)
-		{
-			m_weaponIndex = 2;
-			SwitchWeapons(m_weaponIndex);
-		}
-		else
-		{
-			m_weaponIndex = 0;
-			SwitchWeapons(m_weaponIndex);
-		}
-		break;
-
-	/* Tertiary Weapon */
-	case 2:
-		if (GunArray.Num() > 3)
-		{
-			m_weaponIndex = 3;
-			SwitchWeapons(m_weaponIndex);
-		}
-		else
-		{
-			m_weaponIndex = 0;
-			SwitchWeapons(m_weaponIndex);
-		}
-		break;
-
-	default:
-		break;
+		GunArray[i]->SetVisibility(false);
 	}
+
+	// Set current weapon to be visible
+	GunArray[m_weaponIndex]->SetVisibility(true);
+
+	// Set attachment
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+
+	//switch (m_weaponIndex)
+	//{
+	///* Primary Weapon */
+	//case 0:
+	//	if (GunArray.Num() > 1)
+	//	{
+	//		m_weaponIndex = 1;
+	//		SwitchWeapons(m_weaponIndex);
+	//	}
+	//	break;
+	//
+	///* Secondary Weapon*/
+	//case 1:
+	//	if (GunArray.Num() > 2)
+	//	{
+	//		m_weaponIndex = 2;
+	//		SwitchWeapons(m_weaponIndex);
+	//	}
+	//	else
+	//	{
+	//		m_weaponIndex = 0;
+	//		SwitchWeapons(m_weaponIndex);
+	//	}
+	//	break;
+
+	///* Tertiary Weapon */
+	//case 2:
+	//	if (GunArray.Num() > 3)
+	//	{
+	//		m_weaponIndex = 3;
+	//		SwitchWeapons(m_weaponIndex);
+	//	}
+	//	else
+	//	{
+	//		m_weaponIndex = 0;
+	//		SwitchWeapons(m_weaponIndex);
+	//	}
+	//	break;
+
+	//default:
+	//	break;
+	//}
 }
 
 /* WeaponChange(index)
