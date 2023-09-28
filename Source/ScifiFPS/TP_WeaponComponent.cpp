@@ -90,14 +90,19 @@ void UTP_WeaponComponent::Fire()
 		return;
 	}
 
-	
+	EAmmunitionType tempAmmoType;
+	if (m_isPrimaryWeaponActive)
+		tempAmmoType = EAmmunitionType::AE_Primary;
+	if (m_isSecondaryWeaponActive)
+		tempAmmoType = EAmmunitionType::AE_Secondary;
 
 	if (InventoryComponent)
 	{
-		if (m_isPrimaryWeaponActive && InventoryComponent->GetAssaultRifleAmmo() > 0)
+		if (InventoryComponent->GetAmmoCount(tempAmmoType) > 0)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo())); // DEBUG DELETE
-			InventoryComponent->ConsumeAssaultRifleAmmo();
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAmmoCount(tempAmmoType))); // DEBUG DELETE
+			
+			InventoryComponent->ConsumeAmmo(tempAmmoType);
 
 			// Try and play a firing animation if specified
 			if (FireAnimation != nullptr)
@@ -111,6 +116,10 @@ void UTP_WeaponComponent::Fire()
 			}
 
 			RaycastShot();
+		}
+		else if (InventoryComponent->GetAmmoCount(tempAmmoType) <= 0)
+		{
+			InventoryComponent->ReloadWeapon(tempAmmoType);
 		}
 	}
 }
@@ -179,32 +188,21 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 		m_gunArray[i]->SetVisibility(false);
 	}
 
-	// Set current weapon to be visible
-	m_gunArray[m_weaponIndex]->SetVisibility(true);
-
 	switch (m_weaponIndex)
 	{
 	/* Primary Weapon */
 	case 0:
-		if (m_gunArray.Num() > 1)
-		{
-			m_isPrimaryWeaponActive = true;
-			m_isSecondaryWeaponActive = false;
-		}
+		
+		m_isPrimaryWeaponActive = true;
+		m_isSecondaryWeaponActive = false;
+		
 		break;
 	
 	/* Secondary Weapon*/
 	case 1:
-		if (m_gunArray.Num() > 2)
-		{
-			m_isPrimaryWeaponActive = false;
-			m_isSecondaryWeaponActive = true;
-		}
-		else
-		{
-			m_weaponIndex = 0;
-			SwitchWeapons(m_weaponIndex);
-		}
+		
+		m_isPrimaryWeaponActive = false;
+		m_isSecondaryWeaponActive = true;
 		break;
 
 	///* Tertiary Weapon */
@@ -224,17 +222,10 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	default:
 		break;
 	}
+
+	// Set current weapon to be visible
+	m_gunArray[m_weaponIndex]->SetVisibility(true);
 }
-
-/* WeaponChange(index)
-* int tempIndex = index +1;
-	if(GunArray.Num() > tempIndex)
-		m_weaponIndex = tempIndex;
-		SwitchWeapons(m_weaponIndex);
-	*/
-
-
-
 
 void UTP_WeaponComponent::StartFire()
 {
@@ -257,7 +248,6 @@ void UTP_WeaponComponent::SwitchAmmoType()
 {
 	StopFire();
 	IsAutomatic = !IsAutomatic;
-
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -10,10 +10,14 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
+	m_maxPrimaryAmmunition = 30;
+	m_maxSecondaryAmmunition = 30;
 
-	m_assaultRifleAmmoCount = 30;
-	
+	m_maxAmmunition.Add(EAmmunitionType::AE_Primary, m_maxPrimaryAmmunition);
+	m_maxAmmunition.Add(EAmmunitionType::AE_Secondary, m_maxSecondaryAmmunition);
+
+	m_ammunitionType.Add(EAmmunitionType::AE_Primary, m_maxPrimaryAmmunition);
+	m_ammunitionType.Add(EAmmunitionType::AE_Secondary, m_maxSecondaryAmmunition);
 }
 
 
@@ -35,18 +39,19 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-int UInventoryComponent::GetAssaultRifleAmmo() const
+void UInventoryComponent::ConsumeAmmo(EAmmunitionType ammo)
 {
-	return m_assaultRifleAmmoCount;
+	m_ammunitionType[ammo]--;
 }
 
-void UInventoryComponent::ConsumeAssaultRifleAmmo() const
+uint32 UInventoryComponent::GetAmmoCount(EAmmunitionType ammo) const
 {
-	m_assaultRifleAmmoCount--;
+	 return *m_ammunitionType.Find(ammo);
 }
 
-void UInventoryComponent::SetAssaultRifleAmmo(const uint32 ammoCount)
+void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 {
-	m_assaultRifleAmmoCount = ammoCount;
+	m_ammunitionType[ammo] = m_maxAmmunition[ammo];
 }
+
 

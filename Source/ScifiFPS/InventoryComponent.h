@@ -6,6 +6,12 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EAmmunitionType : uint8 
+{
+	AE_Primary UMETA(DisplayName = "PrimaryAmmunition"),
+	AE_Secondary UMETA(DisplayName = "AE_SecondaryAmmunition"),
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCIFIFPS_API UInventoryComponent : public UActorComponent
@@ -24,13 +30,16 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetAssaultRifleAmmo(const uint32 ammoCount);
+	void ConsumeAmmo(EAmmunitionType ammo);
 
-	int GetAssaultRifleAmmo() const;
+	uint32 GetAmmoCount(EAmmunitionType ammo) const;
 
-	void ConsumeAssaultRifleAmmo() const;
-
+	void ReloadWeapon(EAmmunitionType ammo);
 private:
-	mutable uint32 m_assaultRifleAmmoCount;
-		
+	TMap<EAmmunitionType, uint8> m_ammunitionType;
+	TMap<EAmmunitionType, uint8> m_maxAmmunition;
+
+	uint8 m_maxPrimaryAmmunition;
+	uint8 m_maxSecondaryAmmunition;
+
 };
