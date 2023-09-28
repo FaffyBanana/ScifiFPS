@@ -41,10 +41,6 @@ public:
 	/* Is currently equipped gun automatic */
 	bool IsAutomatic;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	/* Is the assault rifle the current weapon */
-	bool AssaultRifleActive;
-
 	/** Line trace distance (how far the player can shoot)*/
 	float ShootingDistance;
 
@@ -132,6 +128,11 @@ private:
 	/* Index for the gun the character is currently using */
 	uint32 m_weaponIndex;
 
-	TArray<UChildActorComponent*> GunArray;
+	/* Array that holds all weapons (guns) as child actors */
+	TArray<UChildActorComponent*> m_gunArray;
+
+	/* Bools for which gun is active and which are not */
+	bool m_isPrimaryWeaponActive;
+	bool m_isSecondaryWeaponActive;
 
 };

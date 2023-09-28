@@ -25,13 +25,10 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	TimeBetweenShots = 0.15f;
 
 	/* Weapon defaults */
-	IsAutomatic = true;
-	AssaultRifleActive = true;
-
+	IsAutomatic = true;  // Move this to gun specific
 	m_weaponIndex = 0;
-
-	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
-	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponPrimary"));
+	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponSecondary"));
 	
 }
 
@@ -42,12 +39,12 @@ void UTP_WeaponComponent::BeginPlay()
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
 	if (PrimaryGun)
-		GunArray.Add(PrimaryGun);
+		m_gunArray.Add(PrimaryGun);
 
 	if (SecondaryGun)
-		GunArray.Add(SecondaryGun);
+		m_gunArray.Add(SecondaryGun);
 
-	//SwitchToNextWeapon();
+
 }
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
@@ -58,6 +55,7 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 		return;
 	}
 
+	/* Setup weapon attachment */
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	PrimaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 	SecondaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
@@ -92,28 +90,29 @@ void UTP_WeaponComponent::Fire()
 		return;
 	}
 
-	// Try and play a firing animation if specified
-	if (FireAnimation != nullptr)
-	{
-		// Get the animation object for the arms mesh
-		UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
-	}
-
-	RaycastShot();
+	
 
 	if (InventoryComponent)
 	{
-		if (AssaultRifleActive)
+		if (m_isPrimaryWeaponActive && InventoryComponent->GetAssaultRifleAmmo() > 0)
 		{
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo()));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAssaultRifleAmmo())); // DEBUG DELETE
 			InventoryComponent->ConsumeAssaultRifleAmmo();
+
+			// Try and play a firing animation if specified
+			if (FireAnimation != nullptr)
+			{
+				// Get the animation object for the arms mesh
+				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+				if (AnimInstance != nullptr)
+				{
+					AnimInstance->Montage_Play(FireAnimation, 1.f);
+				}
+			}
+
+			RaycastShot();
 		}
 	}
-
 }
 
 void UTP_WeaponComponent::RaycastShot()
@@ -145,24 +144,28 @@ void UTP_WeaponComponent::RaycastShot()
 			enemyManager->GetHealthComponent()->TakeDamage();
 			//DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
 		}
-
 	}
-	
 }
 
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
+	/* Calculate correct weapon index to switch to */
 	float tempIndex = index.Get<float>();
 	int tempValue = UKismetMathLibrary::FTrunc(tempIndex);
 	int tempWeaponIndex = tempValue + m_weaponIndex;
 
-	if (GunArray.IsValidIndex(tempWeaponIndex))
+	// If index exists is in array
+	if (m_gunArray.IsValidIndex(tempWeaponIndex))
 	{
 		m_weaponIndex = tempWeaponIndex;
 	}
+
+	// If player has scrolled to an index that doesn't exist in the array
 	else
 	{
-		m_weaponIndex < 0 ? m_weaponIndex = GunArray.Num() - 1 : m_weaponIndex = 0;
+		/* If the player has scrolled down go back to top of the array,
+			if player has scrolled up go back to the bottom of the array */
+		m_weaponIndex < 0 ? m_weaponIndex = m_gunArray.Num() - 1 : m_weaponIndex = 0;
 	}
 	SwitchToNextWeapon();
 
@@ -171,42 +174,38 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
 	// Set gun actors as invisible
-	for (int i = 0; i < GunArray.Num(); i++)
+	for (int i = 0; i < m_gunArray.Num(); i++)
 	{
-		GunArray[i]->SetVisibility(false);
+		m_gunArray[i]->SetVisibility(false);
 	}
 
 	// Set current weapon to be visible
-	GunArray[m_weaponIndex]->SetVisibility(true);
+	m_gunArray[m_weaponIndex]->SetVisibility(true);
 
-	// Set attachment
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	GunArray[m_weaponIndex]->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-
-	//switch (m_weaponIndex)
-	//{
-	///* Primary Weapon */
-	//case 0:
-	//	if (GunArray.Num() > 1)
-	//	{
-	//		m_weaponIndex = 1;
-	//		SwitchWeapons(m_weaponIndex);
-	//	}
-	//	break;
-	//
-	///* Secondary Weapon*/
-	//case 1:
-	//	if (GunArray.Num() > 2)
-	//	{
-	//		m_weaponIndex = 2;
-	//		SwitchWeapons(m_weaponIndex);
-	//	}
-	//	else
-	//	{
-	//		m_weaponIndex = 0;
-	//		SwitchWeapons(m_weaponIndex);
-	//	}
-	//	break;
+	switch (m_weaponIndex)
+	{
+	/* Primary Weapon */
+	case 0:
+		if (m_gunArray.Num() > 1)
+		{
+			m_isPrimaryWeaponActive = true;
+			m_isSecondaryWeaponActive = false;
+		}
+		break;
+	
+	/* Secondary Weapon*/
+	case 1:
+		if (m_gunArray.Num() > 2)
+		{
+			m_isPrimaryWeaponActive = false;
+			m_isSecondaryWeaponActive = true;
+		}
+		else
+		{
+			m_weaponIndex = 0;
+			SwitchWeapons(m_weaponIndex);
+		}
+		break;
 
 	///* Tertiary Weapon */
 	//case 2:
@@ -222,9 +221,9 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	//	}
 	//	break;
 
-	//default:
-	//	break;
-	//}
+	default:
+		break;
+	}
 }
 
 /* WeaponChange(index)
@@ -259,8 +258,6 @@ void UTP_WeaponComponent::SwitchAmmoType()
 	StopFire();
 	IsAutomatic = !IsAutomatic;
 
-	//IsAutomatic ? GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic On")) : GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Automatic Off"));
-	
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

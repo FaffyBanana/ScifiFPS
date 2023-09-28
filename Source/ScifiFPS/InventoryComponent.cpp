@@ -12,6 +12,7 @@ UInventoryComponent::UInventoryComponent()
 
 	// ...
 
+	m_assaultRifleAmmoCount = 30;
 	
 }
 
