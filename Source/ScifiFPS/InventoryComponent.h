@@ -13,6 +13,19 @@ enum class EAmmunitionType : uint8
 	AE_Secondary UMETA(DisplayName = "AE_SecondaryAmmunition"),
 };
 
+USTRUCT(BlueprintType)
+struct FAmmunition
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	uint8 DefaultMaxPrimaryAmmunition = 30;
+
+	UPROPERTY()
+	uint8 DefaultSecondaryAmmunition = 30;
+};
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCIFIFPS_API UInventoryComponent : public UActorComponent
 {
@@ -36,10 +49,9 @@ public:
 
 	void ReloadWeapon(EAmmunitionType ammo);
 private:
-	TMap<EAmmunitionType, uint8> m_ammunitionType;
+	TMap<EAmmunitionType, uint8> m_ammunitionCount;
 	TMap<EAmmunitionType, uint8> m_maxAmmunition;
 
-	uint8 m_maxPrimaryAmmunition;
-	uint8 m_maxSecondaryAmmunition;
+	FAmmunition m_ammunitionSettings;
 
 };

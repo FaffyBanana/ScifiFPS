@@ -4,20 +4,17 @@
 #include "InventoryComponent.h"
 
 // Sets default values for this component's properties
-UInventoryComponent::UInventoryComponent()
+UInventoryComponent::UInventoryComponent() 
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	m_maxPrimaryAmmunition = 30;
-	m_maxSecondaryAmmunition = 30;
+	m_maxAmmunition.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
+	m_maxAmmunition.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultSecondaryAmmunition);
 
-	m_maxAmmunition.Add(EAmmunitionType::AE_Primary, m_maxPrimaryAmmunition);
-	m_maxAmmunition.Add(EAmmunitionType::AE_Secondary, m_maxSecondaryAmmunition);
-
-	m_ammunitionType.Add(EAmmunitionType::AE_Primary, m_maxPrimaryAmmunition);
-	m_ammunitionType.Add(EAmmunitionType::AE_Secondary, m_maxSecondaryAmmunition);
+	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunition[EAmmunitionType::AE_Primary]);
+	m_ammunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunition[EAmmunitionType::AE_Secondary]);
 }
 
 
@@ -41,17 +38,17 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UInventoryComponent::ConsumeAmmo(EAmmunitionType ammo)
 {
-	m_ammunitionType[ammo]--;
+	m_ammunitionCount[ammo]--;
 }
 
 uint32 UInventoryComponent::GetAmmoCount(EAmmunitionType ammo) const
 {
-	 return *m_ammunitionType.Find(ammo);
+	 return m_ammunitionCount[ammo];
 }
 
 void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 {
-	m_ammunitionType[ammo] = m_maxAmmunition[ammo];
+	m_ammunitionCount[ammo] = m_maxAmmunition[ammo];
 }
 
 

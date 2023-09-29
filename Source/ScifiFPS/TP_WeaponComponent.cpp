@@ -27,9 +27,10 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	/* Weapon defaults */
 	IsAutomatic = true;  // Move this to gun specific
 	m_weaponIndex = 0;
-	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponPrimary"));
-	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponSecondary"));
-	
+	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
+	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
+
+	m_currentWeapon = EAmmunitionType::AE_Primary;
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -39,11 +40,18 @@ void UTP_WeaponComponent::BeginPlay()
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
 	if (PrimaryGun)
+	{
 		m_gunArray.Add(PrimaryGun);
+		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
+	}
 
 	if (SecondaryGun)
+	{
 		m_gunArray.Add(SecondaryGun);
+		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
+	}
 
+	m_isWeaponActiveMap[m_currentWeapon] = true;
 
 }
 
@@ -90,19 +98,13 @@ void UTP_WeaponComponent::Fire()
 		return;
 	}
 
-	EAmmunitionType tempAmmoType;
-	if (m_isPrimaryWeaponActive)
-		tempAmmoType = EAmmunitionType::AE_Primary;
-	if (m_isSecondaryWeaponActive)
-		tempAmmoType = EAmmunitionType::AE_Secondary;
-
 	if (InventoryComponent)
 	{
-		if (InventoryComponent->GetAmmoCount(tempAmmoType) > 0)
+		if (InventoryComponent->GetAmmoCount(m_currentWeapon) > 0)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAmmoCount(tempAmmoType))); // DEBUG DELETE
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAmmoCount(m_currentWeapon))); // DEBUG DELETE -------------------------
 			
-			InventoryComponent->ConsumeAmmo(tempAmmoType);
+			InventoryComponent->ConsumeAmmo(m_currentWeapon);
 
 			// Try and play a firing animation if specified
 			if (FireAnimation != nullptr)
@@ -117,9 +119,10 @@ void UTP_WeaponComponent::Fire()
 
 			RaycastShot();
 		}
-		else if (InventoryComponent->GetAmmoCount(tempAmmoType) <= 0)
+		else
 		{
-			InventoryComponent->ReloadWeapon(tempAmmoType);
+			InventoryComponent->ReloadWeapon(m_currentWeapon);
+			Fire(); // TODO: Move to this to reload animation timer -------------
 		}
 	}
 }
@@ -182,10 +185,18 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
+	StopFire();
+
 	// Set gun actors as invisible
 	for (int i = 0; i < m_gunArray.Num(); i++)
 	{
 		m_gunArray[i]->SetVisibility(false);
+		IsAutomatic = false;
+	}
+
+	for (TPair<EAmmunitionType, bool>& pair: m_isWeaponActiveMap)
+	{
+		pair.Value = false;
 	}
 
 	switch (m_weaponIndex)
@@ -193,16 +204,15 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	/* Primary Weapon */
 	case 0:
 		
-		m_isPrimaryWeaponActive = true;
-		m_isSecondaryWeaponActive = false;
-		
+		m_currentWeapon = EAmmunitionType::AE_Primary;
+		IsAutomatic = true;
 		break;
 	
 	/* Secondary Weapon*/
 	case 1:
 		
-		m_isPrimaryWeaponActive = false;
-		m_isSecondaryWeaponActive = true;
+		m_currentWeapon = EAmmunitionType::AE_Secondary;
+		IsAutomatic = false;
 		break;
 
 	///* Tertiary Weapon */
@@ -225,6 +235,8 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 
 	// Set current weapon to be visible
 	m_gunArray[m_weaponIndex]->SetVisibility(true);
+	m_isWeaponActiveMap[m_currentWeapon] = true;
+
 }
 
 void UTP_WeaponComponent::StartFire()

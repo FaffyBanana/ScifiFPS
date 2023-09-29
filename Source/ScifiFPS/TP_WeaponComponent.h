@@ -131,8 +131,8 @@ private:
 	/* Array that holds all weapons (guns) as child actors */
 	TArray<UChildActorComponent*> m_gunArray;
 
-	/* Bools for which gun is active and which are not */
-	bool m_isPrimaryWeaponActive;
-	bool m_isSecondaryWeaponActive;
+	TMap<EAmmunitionType, bool> m_isWeaponActiveMap;
+
+	EAmmunitionType m_currentWeapon;
 
 };
