@@ -17,67 +17,6 @@ class SCIFIFPS_API UTP_WeaponComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	/** Projectile class to spawn */
-	/*UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AScifiFPSProjectile> ProjectileClass;*/
-
-	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
-	
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
-
-	/* Seconds to wait between shots */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float TimeBetweenShots;
-
-	/** Gun muzzle's offset from the characters location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	FVector MuzzleOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	/* Is currently equipped gun automatic */
-	bool IsAutomatic;
-
-	/** Line trace distance (how far the player can shoot)*/
-	float ShootingDistance;
-
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputMappingContext* FireMappingContext;
-
-	/** Fire Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* FireAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* SwitchAmmoAction;
-
-	/** Fire Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* SwitchWeaponsAction;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
-	UInventoryComponent* InventoryComponent;
-
-	
-	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	class UChildActorComponent* PrimaryGun;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	class UChildActorComponent* SecondaryGun;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	AGunBase* PrimaryGun;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	AGunBase* SecondaryGun;*/
-
-public:
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
@@ -85,27 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void StartFire();
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void StopFire();
-
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void SwitchAmmoType();
-
-	/** Make the weapon Fire a Projectile */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Fire();
-
-	/* Send a line trace for raycast shooting */
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void RaycastShot();
-
 	UFUNCTION()
+	/* Calculate the correct weapon index */
 	void SwitchWeapons(const FInputActionValue& index);
-
-	void SwitchToNextWeapon();
 
 protected:
 	UFUNCTION()
@@ -116,23 +37,89 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	/** The Character holding this weapon*/
+	/* Fire single shot */
+	void Fire();
+
+	/* Start shooting
+	   Sets timer for automatic firing */
+	void StartFire();
+
+	/* Stop shooting
+	   Clears timer for automatic firing */
+	void StopFire();
+
+	/* Create line trace for shooting */
+	void RaycastShot();
+
+	/* Handles the switching of weapons */
+	void SwitchToNextWeapon();
+
+public:
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	USoundBase* FireSound;
+
+	/** AnimMontage to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* FireAnimation;
+
+	/* Seconds to wait between shots */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float TimeBetweenShots;
+
+	/** Gun muzzle's offset from the characters location */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FVector MuzzleOffset;
+
+	/** Line trace distance (how far the player can shoot)*/
+	float ShootingDistance;
+
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* FireMappingContext;
+
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
+
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* SwitchWeaponsAction;
+
+	/* Inventory component reference */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
+	UInventoryComponent* InventoryComponent;
+
+	/* Primary gun */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon)
+	AGunBase* PrimaryGun;
+
+	/* Secondary gun */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon)
+	AGunBase* SecondaryGun;
+	
+private:
+	// The Character holding this weapon 
 	AScifiFPSCharacter* Character;
 
-	/* Shooting timer handle */
+	// Shooting timer handle 
 	FTimerHandle m_handleRefire;
 
-	/* Automatic weapon ammo counter */
-	uint32 m_automaticGunAmmoCount;
-
-	/* Index for the gun the character is currently using */
+	// Index for the gun the character is currently using 
 	uint32 m_weaponIndex;
 
-	/* Array that holds all weapons (guns) as child actors */
-	TArray<UChildActorComponent*> m_gunArray;
+	//Array that holds all weapons (guns) as child actors 
+	TArray<AGunBase*> m_gunArray;
 
-	TMap<EAmmunitionType, bool> m_isWeaponActiveMap;
+	/* Ammunition mappings */
+	TMap<EAmmunitionType, bool> m_isWeaponActiveMap; // Which weapon is active currently
+	TMap<EAmmunitionType, bool> m_isAutomaticMap; // Which weapons are automatic 
 
-	EAmmunitionType m_currentWeapon;
+	// Holds what weapon is currently active
+	EAmmunitionType m_currentWeapon; 
+
+	/* References to weapons */
+	TSubclassOf<AGunBase> PrimaryWeaponRef;
+	TSubclassOf<AGunBase> SecondaryWeaponRef;
 
 };

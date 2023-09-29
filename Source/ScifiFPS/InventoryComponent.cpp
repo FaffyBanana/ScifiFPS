@@ -10,9 +10,11 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
+	// Set max ammunition of each weapon
 	m_maxAmmunition.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
 	m_maxAmmunition.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultSecondaryAmmunition);
 
+	// Set ammunition count of each weapon
 	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunition[EAmmunitionType::AE_Primary]);
 	m_ammunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunition[EAmmunitionType::AE_Secondary]);
 }

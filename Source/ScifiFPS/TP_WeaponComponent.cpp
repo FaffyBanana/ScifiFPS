@@ -25,12 +25,22 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	TimeBetweenShots = 0.15f;
 
 	/* Weapon defaults */
-	IsAutomatic = true;  // Move this to gun specific
 	m_weaponIndex = 0;
-	PrimaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("PrimaryWeapon"));
-	SecondaryGun = CreateDefaultSubobject<UChildActorComponent>(TEXT("SecondaryWeapon"));
-
 	m_currentWeapon = EAmmunitionType::AE_Primary;
+
+	/* Find the blueprint Primary Gun Class through reference */
+	static ConstructorHelpers::FClassFinder<AGunBase> PrimaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_AutomaticRifle"));
+	if (PrimaryWeaponFinder.Class)
+	{
+		PrimaryWeaponRef = PrimaryWeaponFinder.Class;
+	}
+
+	/* Find the blueprint Secondary Gun Class through reference */
+	static ConstructorHelpers::FClassFinder<AGunBase> SecondaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_SingleShotRifle"));
+	if (SecondaryWeaponFinder.Class)
+	{
+		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
+	}
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -39,20 +49,31 @@ void UTP_WeaponComponent::BeginPlay()
 
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
+	/* Spawn all guns */
+	FVector location(0.0f, 0.0f, 0.0f);
+	FRotator rotation(0.0f, 0.0f, 0.0f);
+	FActorSpawnParameters spawnInfo;
+	PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, location, rotation, spawnInfo);
+	SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, location, rotation, spawnInfo);
+
+	/* Set primary gun defaults */
 	if (PrimaryGun)
 	{
 		m_gunArray.Add(PrimaryGun);
 		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
+		m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
 	}
 
+	/* Set secondary gun defaults */
 	if (SecondaryGun)
 	{
 		m_gunArray.Add(SecondaryGun);
 		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
+		m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
 	}
 
+	/* Set current weapon as active */
 	m_isWeaponActiveMap[m_currentWeapon] = true;
-
 }
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
@@ -62,11 +83,11 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 	{
 		return;
 	}
-
+	
 	/* Setup weapon attachment */
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	PrimaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	SecondaryGun->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	PrimaryGun->GetGunSkeletalMeshComponent()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	SecondaryGun->GetGunSkeletalMeshComponent()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	Character->SetHasRifle(true);
@@ -85,10 +106,11 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
-			EnhancedInputComponent->BindAction(SwitchAmmoAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchAmmoType);
 			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchWeapons);
 		}
 	}
+
+	SwitchToNextWeapon();
 }
 
 void UTP_WeaponComponent::Fire()
@@ -102,8 +124,6 @@ void UTP_WeaponComponent::Fire()
 	{
 		if (InventoryComponent->GetAmmoCount(m_currentWeapon) > 0)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(InventoryComponent->GetAmmoCount(m_currentWeapon))); // DEBUG DELETE -------------------------
-			
 			InventoryComponent->ConsumeAmmo(m_currentWeapon);
 
 			// Try and play a firing animation if specified
@@ -185,15 +205,13 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
-	StopFire();
-
-	// Set gun actors as invisible
+	/* Set gun actors as invisible */
 	for (int i = 0; i < m_gunArray.Num(); i++)
 	{
-		m_gunArray[i]->SetVisibility(false);
-		IsAutomatic = false;
+		m_gunArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
 	}
 
+	/* Set all gun as inactive */
 	for (TPair<EAmmunitionType, bool>& pair: m_isWeaponActiveMap)
 	{
 		pair.Value = false;
@@ -205,61 +223,40 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	case 0:
 		
 		m_currentWeapon = EAmmunitionType::AE_Primary;
-		IsAutomatic = true;
 		break;
 	
 	/* Secondary Weapon*/
 	case 1:
 		
 		m_currentWeapon = EAmmunitionType::AE_Secondary;
-		IsAutomatic = false;
 		break;
-
-	///* Tertiary Weapon */
-	//case 2:
-	//	if (GunArray.Num() > 3)
-	//	{
-	//		m_weaponIndex = 3;
-	//		SwitchWeapons(m_weaponIndex);
-	//	}
-	//	else
-	//	{
-	//		m_weaponIndex = 0;
-	//		SwitchWeapons(m_weaponIndex);
-	//	}
-	//	break;
 
 	default:
 		break;
 	}
 
-	// Set current weapon to be visible
-	m_gunArray[m_weaponIndex]->SetVisibility(true);
+	// Set current weapon to be visible and active
+	m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->SetVisibility(true);
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
+	StopFire();
 }
 
 void UTP_WeaponComponent::StartFire()
 {
-	/* Fire weapon */
+	// Fire weapon 
 	Fire();
 	
-	if (IsAutomatic)
-		/* Automatic shooting timer */
+	if (m_isAutomaticMap[m_currentWeapon])
+		// Automatic shooting timer 
 		Character->GetWorldTimerManager().SetTimer(m_handleRefire, this, &UTP_WeaponComponent::Fire, TimeBetweenShots, true);
 }
 
 void UTP_WeaponComponent::StopFire()
 {
-	if (IsAutomatic)
-		/* Clear automatic shooting timer */
+	if (m_isAutomaticMap[m_currentWeapon])
+		// Clear automatic shooting timer 
 		Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
-}
-
-void UTP_WeaponComponent::SwitchAmmoType()
-{
-	StopFire();
-	IsAutomatic = !IsAutomatic;
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -279,9 +276,9 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 
-/// Code from default template that I don't need but don't want to delete yet
 
-//// Try and fire a projectile
+// Code from default template that I don't need but don't want to delete yet
+	// Try and fire a projectile
 	//if (ProjectileClass != nullptr)
 	//{
 	//	UWorld* const World = GetWorld();
@@ -300,7 +297,7 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//		World->SpawnActor<AScifiFPSProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 	//	}
 	//}
-
+	//
 	// Try and play the sound if specified
 	//if(FireSound != nullptr)
 	//{

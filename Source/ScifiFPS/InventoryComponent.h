@@ -43,15 +43,23 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	/* Consume ammunition by decrementing count */
 	void ConsumeAmmo(EAmmunitionType ammo);
 
+	/* Return the ammunition count */
 	uint32 GetAmmoCount(EAmmunitionType ammo) const;
 
+	/* Reloads the weapon by resetting the count back to it's max ammunition */
 	void ReloadWeapon(EAmmunitionType ammo);
+
 private:
+	// Hash map for ammunition count of each weapon
 	TMap<EAmmunitionType, uint8> m_ammunitionCount;
+
+	// Hash map for the max amount of ammunition (before gun has to reload the catridge) of each weapon
 	TMap<EAmmunitionType, uint8> m_maxAmmunition;
 
+	// Reference to struct that holds the ammunitions default variables 
 	FAmmunition m_ammunitionSettings;
 
 };
