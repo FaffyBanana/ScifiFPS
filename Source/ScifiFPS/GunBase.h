@@ -6,12 +6,30 @@
 #include "GameFramework/Actor.h"
 #include "GunBase.generated.h"
 
+
+/*****************************************************************************************************
+ * Type: Class
+ *
+ * Name: AGunBase
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose: Base class for all guns
+ *
+ * References: N/A
+ *
+ * See Also: UTP_WeaponComponent
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 29/08/2023    JA          V1.0        N/A
+*****************************************************************************************************/
 UCLASS()
 class SCIFIFPS_API AGunBase : public AActor
 {
 	GENERATED_BODY()
 	
-	/** Pawn mesh: 1st person view (arms; seen only by self) */
+	/** Skeletal mesh of weapon */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* GunSkeletalMeshComponent;
 
@@ -19,6 +37,7 @@ public:
 	// Sets default values for this actor's properties
 	AGunBase();
 
+	/* Returns the skeletal mesh of the gun */
 	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
 
 protected:

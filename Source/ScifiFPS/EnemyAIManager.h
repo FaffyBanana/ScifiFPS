@@ -7,6 +7,24 @@
 #include "TP_WeaponComponent.h"
 #include "HealthComponent.h"
 #include "EnemyAIManager.generated.h"
+
+/*****************************************************************************************************
+ * Type: Class
+ *
+ * Name:
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose:
+ *
+ * References: N/A
+ *
+ * See Also: N/A
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * ----------    JA          -------     ----------------------------------------------
+*****************************************************************************************************/
 UCLASS()
 class SCIFIFPS_API AEnemyAIManager : public ACharacter
 {

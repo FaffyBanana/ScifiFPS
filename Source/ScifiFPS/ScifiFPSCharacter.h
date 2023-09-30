@@ -18,6 +18,24 @@ class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
 
+
+/*****************************************************************************************************
+ * Type: Class
+ *
+ * Name: AScifiFPSCharacter
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose: The player class, handles all player data
+ *
+ * References: Heavily edited version of Unreal's first player character template
+ *
+ * See Also: N/A
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 02/08/2023    JA          V1.0        N/A
+*****************************************************************************************************/
 UCLASS(config=Game)
 class AScifiFPSCharacter : public ACharacter
 {
@@ -43,12 +61,15 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
+	/** Weapon component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* WeaponComponent;
 
+	/** Health component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
 	
+	/** Inventory Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
 
@@ -78,10 +99,10 @@ public:
 	/* Return Health Component */
 	UHealthComponent* GetHealthComponent() const;
 
+	/* Respawn and reset the player */
 	UFUNCTION(BlueprintCallable)
 	void Respawn();
 
-	
 
 protected:
 	/** Called for movement input */
@@ -93,8 +114,8 @@ protected:
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-	// End of APawn interface
 
+	// End of APawn interface
 	virtual void Tick(float DeltaTime) override;
 
 public:
@@ -102,7 +123,6 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-	
 
 private:
 	/* Game Over Menu */

@@ -11,6 +11,24 @@
 
 class AScifiFPSCharacter;
 
+/*****************************************************************************************************
+ * Type: Class
+ *
+ * Name: UTP_WeaponComponent
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose: Handles all weapon data including guns and shooting
+ *
+ * References: Heavily edited version of Unreal's TP_WeaponComponent template 
+ *
+ * See Also: UInventoryComponent (ammunition storage and consumption)
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 02/08/2023    JA          v1.0        N/A
+*****************************************************************************************************/
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCIFIFPS_API UTP_WeaponComponent : public UActorComponent
 {
@@ -24,8 +42,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
 
-	UFUNCTION()
 	/* Calculate the correct weapon index */
+	UFUNCTION()
 	void SwitchWeapons(const FInputActionValue& index);
 
 protected:

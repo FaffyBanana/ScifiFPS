@@ -6,6 +6,24 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+
+/*****************************************************************************************************
+ * Type: Enum class
+ *
+ * Name: EAmmunitionType
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose: Enum for every weapon type
+ *
+ * References: N/A
+ *
+ * See Also: UInventoryComponent (Handles ammunition), TP_WeaponComponent (Handles weapon firing)
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 28/09/2023    JA          V1.0        N/A
+*****************************************************************************************************/
 UENUM(BlueprintType)
 enum class EAmmunitionType : uint8 
 {
@@ -13,6 +31,23 @@ enum class EAmmunitionType : uint8
 	AE_Secondary UMETA(DisplayName = "AE_SecondaryAmmunition"),
 };
 
+/*****************************************************************************************************
+ * Type: Struct
+ *
+ * Name: FAmmunition
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose: Handles all default settings for weapon
+ *
+ * References: N/A
+ *
+ * See Also: N/A
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 29/08/2023    JA          V1.0        N/A
+*****************************************************************************************************/
 USTRUCT(BlueprintType)
 struct FAmmunition
 {
@@ -26,6 +61,23 @@ public:
 	uint8 DefaultSecondaryAmmunition = 30;
 };
 
+/*****************************************************************************************************
+ * Type: Class
+ *
+ * Name:
+ *
+ * Author: Jaber Ahmed
+ *
+ * Purpose:
+ *
+ * References: N/A
+ *
+ * See Also: N/A
+ *
+ * Change Log:
+ * Date          Initials    Version     Comments
+ * 27/08/2023    JA          V1.0        Basic ammunition system to hold ammunition data
+*****************************************************************************************************/
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SCIFIFPS_API UInventoryComponent : public UActorComponent
 {
