@@ -5,4 +5,11 @@
 
 UPlayerHUDWidget::UPlayerHUDWidget(const FObjectInitializer& ObjectInitalizer) : Super(ObjectInitalizer)
 {
+	
+}
+
+void UPlayerHUDWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "AmmoCounterWidget.h"
 #include "PlayerHUDWidget.generated.h"
 
 /**
@@ -16,4 +17,7 @@ class SCIFIFPS_API UPlayerHUDWidget : public UUserWidget
 	
 public:
 	UPlayerHUDWidget(const FObjectInitializer& ObjectInitalizer);
+
+	/* Native Construct */
+	virtual void NativeConstruct() override;
 };

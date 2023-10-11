@@ -56,6 +56,12 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
 
+	static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
+	if (playerHUDWidgetClassFinder.Class)
+	{
+		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
+	}
+
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -76,6 +82,12 @@ void AScifiFPSCharacter::BeginPlay()
 	if (WeaponComponent)
 	{
 		WeaponComponent->AttachWeapon(this);
+	}
+
+	if (PlayerHUDWidgetClass)
+	{
+		PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+		PlayerHUDWidget->AddToViewport(0);
 	}
 }
 
@@ -159,4 +171,9 @@ bool AScifiFPSCharacter::GetHasRifle() const
 UHealthComponent* AScifiFPSCharacter::GetHealthComponent() const
 {
 	return HealthComponent;
+}
+
+UTP_WeaponComponent* AScifiFPSCharacter::GetWeaponComponent() const
+{
+	return WeaponComponent;
 }

@@ -9,6 +9,7 @@
 #include "GunBase.h"
 #include "TP_WeaponComponent.generated.h"
 
+
 class AScifiFPSCharacter;
 
 /*****************************************************************************************************
@@ -45,6 +46,8 @@ public:
 	/* Calculate the correct weapon index */
 	UFUNCTION()
 	void SwitchWeapons(const FInputActionValue& index);
+
+	uint32 GetCurrentAmmo() const;
 
 protected:
 	UFUNCTION()

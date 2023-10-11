@@ -99,6 +99,9 @@ public:
 	/* Return Health Component */
 	UHealthComponent* GetHealthComponent() const;
 
+	/* Return Weapon Component */
+	UTP_WeaponComponent* GetWeaponComponent() const;
+
 	/* Respawn and reset the player */
 	UFUNCTION(BlueprintCallable)
 	void Respawn();
@@ -128,5 +131,9 @@ private:
 	/* Game Over Menu */
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 	UUserWidget* GameOverWidget;
+
+	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+	UUserWidget* PlayerHUDWidget;
+
 };
 

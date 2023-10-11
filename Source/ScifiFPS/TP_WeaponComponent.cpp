@@ -203,6 +203,11 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 
 }
 
+uint32 UTP_WeaponComponent::GetCurrentAmmo() const
+{
+	return InventoryComponent->GetAmmoCount(m_currentWeapon);
+}
+
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
 	/* Set gun actors as invisible */
