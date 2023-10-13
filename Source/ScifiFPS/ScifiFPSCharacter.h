@@ -99,6 +99,9 @@ public:
 	/* Return Health Component */
 	UHealthComponent* GetHealthComponent() const;
 
+	UInventoryComponent* GetInventoryComponent() const;
+
+
 	/* Return Weapon Component */
 	UTP_WeaponComponent* GetWeaponComponent() const;
 

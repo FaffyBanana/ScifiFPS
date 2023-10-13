@@ -8,17 +8,20 @@ void UAmmoCounterWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	//AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 
-	if(player)
-	{
-		Player = player;
-	}
+	//if(player)
+	//{
+	//	//Player = player;
 
-	if(Player)
-	{
+	//	player->GetWeaponComponent()->GetCurrentAmmo();
+	//}
+
+	//if(Player)
+	//{
+		//Player->GetWeaponComponent()->GetCurrentAmmo();
 		//FText ammo = UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetCurrentAmmo());
 		//AmmoText->SetText(ammo);
 		// /Script/UMGEditor.WidgetBlueprint'/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD.WBP_PlayerHUD'
-	}
+	//}
 }

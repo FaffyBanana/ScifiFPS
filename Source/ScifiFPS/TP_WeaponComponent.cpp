@@ -41,6 +41,7 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	{
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
 	}
+
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -48,6 +49,7 @@ void UTP_WeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
+
 
 	/* Spawn all guns */
 	FVector location(0.0f, 0.0f, 0.0f);
@@ -203,7 +205,7 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 
 }
 
-uint32 UTP_WeaponComponent::GetCurrentAmmo() const
+int32 UTP_WeaponComponent::GetCurrentAmmo() const
 {
 	return InventoryComponent->GetAmmoCount(m_currentWeapon);
 }

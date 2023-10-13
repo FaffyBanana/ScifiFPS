@@ -173,6 +173,11 @@ UHealthComponent* AScifiFPSCharacter::GetHealthComponent() const
 	return HealthComponent;
 }
 
+UInventoryComponent* AScifiFPSCharacter::GetInventoryComponent() const
+{
+	return InventoryComponent;
+}
+
 UTP_WeaponComponent* AScifiFPSCharacter::GetWeaponComponent() const
 {
 	return WeaponComponent;

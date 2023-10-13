@@ -47,7 +47,8 @@ public:
 	UFUNCTION()
 	void SwitchWeapons(const FInputActionValue& index);
 
-	uint32 GetCurrentAmmo() const;
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentAmmo() const;
 
 protected:
 	UFUNCTION()
@@ -107,10 +108,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SwitchWeaponsAction;
 
-	/* Inventory component reference */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
-	UInventoryComponent* InventoryComponent;
-
 	/* Primary gun */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon)
 	AGunBase* PrimaryGun;
@@ -122,6 +119,9 @@ public:
 private:
 	// The Character holding this weapon 
 	AScifiFPSCharacter* Character;
+
+	// Inventory component reference
+	UInventoryComponent* InventoryComponent;
 
 	// Shooting timer handle 
 	FTimerHandle m_handleRefire;
