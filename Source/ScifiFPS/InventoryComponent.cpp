@@ -11,12 +11,16 @@ UInventoryComponent::UInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	// Set max ammunition of each weapon
-	m_maxAmmunition.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
-	m_maxAmmunition.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultSecondaryAmmunition);
+	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
+	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultSecondaryAmmunition);
 
 	// Set ammunition count of each weapon
-	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunition[EAmmunitionType::AE_Primary]);
-	m_ammunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunition[EAmmunitionType::AE_Secondary]);
+	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Primary]);
+	m_ammunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Secondary]);
+
+	// Set ammunition count of each weapon
+	m_totalAmmunitionCount.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultTotalPrimaryAmmunition);
+	m_totalAmmunitionCount.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultTotalSecondaryAmmunition);
 }
 
 
@@ -43,14 +47,29 @@ void UInventoryComponent::ConsumeAmmo(EAmmunitionType ammo)
 	m_ammunitionCount[ammo]--;
 }
 
-uint32 UInventoryComponent::GetAmmoCount(EAmmunitionType ammo) const
+int32 UInventoryComponent::GetAmmoCount(EAmmunitionType ammo) const
 {
 	 return m_ammunitionCount[ammo];
 }
 
+int32 UInventoryComponent::GetTotalAmmoCount(EAmmunitionType ammo) const
+{
+	return m_totalAmmunitionCount[ammo];
+}
+
 void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 {
-	m_ammunitionCount[ammo] = m_maxAmmunition[ammo];
+	if (m_totalAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
+	{
+		m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
+		m_totalAmmunitionCount[ammo] -= m_maxAmmunitionInCatridge[ammo];
+	}
+
+	else if ( m_totalAmmunitionCount[ammo] > 0)
+	{
+		m_ammunitionCount[ammo] = m_totalAmmunitionCount[ammo];
+		m_totalAmmunitionCount[ammo] = 0;
+	}
 }
 
 

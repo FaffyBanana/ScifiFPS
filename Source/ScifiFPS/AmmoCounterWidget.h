@@ -21,6 +21,13 @@ public:
 	/* Native Construct */
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable)
+	FText GetAmmoText() const;
+
+	UFUNCTION(BlueprintCallable)
+	FText GetTotalAmmoText() const;
+private:
+
 public:
 	UPROPERTY(meta = (BindWidget))
 		class UHorizontalBox* HorizontalBox;

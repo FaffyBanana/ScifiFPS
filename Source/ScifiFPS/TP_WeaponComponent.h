@@ -10,6 +10,7 @@
 #include "TP_WeaponComponent.generated.h"
 
 
+
 class AScifiFPSCharacter;
 
 /*****************************************************************************************************
@@ -49,6 +50,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetCurrentAmmo() const;
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetTotalCurrentAmmo() const;
 
 protected:
 	UFUNCTION()
@@ -127,7 +131,7 @@ private:
 	FTimerHandle m_handleRefire;
 
 	// Index for the gun the character is currently using 
-	uint32 m_weaponIndex;
+	int32 m_weaponIndex;
 
 	//Array that holds all weapons (guns) as child actors 
 	TArray<AGunBase*> m_gunArray;

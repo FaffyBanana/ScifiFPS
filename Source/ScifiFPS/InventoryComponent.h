@@ -55,10 +55,16 @@ struct FAmmunition
 
 public:
 	UPROPERTY()
-	uint8 DefaultMaxPrimaryAmmunition = 30;
+	int8 DefaultMaxPrimaryAmmunition = 30;
 
 	UPROPERTY()
-	uint8 DefaultSecondaryAmmunition = 30;
+	int8 DefaultSecondaryAmmunition = 30;
+
+	UPROPERTY()
+	int8 DefaultTotalPrimaryAmmunition = 120;
+
+	UPROPERTY()
+	int8 DefaultTotalSecondaryAmmunition = 80;
 };
 
 /*****************************************************************************************************
@@ -99,17 +105,22 @@ public:
 	void ConsumeAmmo(EAmmunitionType ammo);
 
 	/* Return the ammunition count */
-	uint32 GetAmmoCount(EAmmunitionType ammo) const;
+	int32 GetAmmoCount(EAmmunitionType ammo) const;
+
+	int32 GetTotalAmmoCount(EAmmunitionType ammo) const;
 
 	/* Reloads the weapon by resetting the count back to it's max ammunition */
 	void ReloadWeapon(EAmmunitionType ammo);
 
 private:
 	// Hash map for ammunition count of each weapon
-	TMap<EAmmunitionType, uint8> m_ammunitionCount;
+	TMap<EAmmunitionType, int8> m_ammunitionCount;
 
 	// Hash map for the max amount of ammunition (before gun has to reload the catridge) of each weapon
-	TMap<EAmmunitionType, uint8> m_maxAmmunition;
+	TMap<EAmmunitionType, int8> m_maxAmmunitionInCatridge;
+
+	// Hash map for the reserve ammunition
+	TMap<EAmmunitionType, int8> m_totalAmmunitionCount;
 
 	// Reference to struct that holds the ammunitions default variables 
 	FAmmunition m_ammunitionSettings;
