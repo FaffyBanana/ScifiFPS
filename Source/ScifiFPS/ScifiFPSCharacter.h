@@ -132,8 +132,8 @@ private:
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 	UUserWidget* GameOverWidget;
 
-	TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
-	UUserWidget* PlayerHUDWidget;
+	/*TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+	UUserWidget* PlayerHUDWidget;*/
 
 };
 

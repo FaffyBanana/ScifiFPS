@@ -56,11 +56,11 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
+	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
 	{
 		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
-	}
+	}*/
 
 }
 
@@ -84,11 +84,11 @@ void AScifiFPSCharacter::BeginPlay()
 		WeaponComponent->AttachWeapon(this);
 	}
 
-	if (PlayerHUDWidgetClass)
-	{
-		PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
-		PlayerHUDWidget->AddToViewport(0);
-	}
+	//if (PlayerHUDWidgetClass)
+	//{
+	//	PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+	//	PlayerHUDWidget->AddToViewport(0);
+	//}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
