@@ -267,9 +267,9 @@ void UTP_WeaponComponent::StartFire()
 
 void UTP_WeaponComponent::StopFire()
 {
-	if (m_isAutomaticMap[m_currentWeapon])
-		// Clear automatic shooting timer 
-		Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
+	//if (m_isAutomaticMap[m_currentWeapon])
+	// Clear automatic shooting timer 
+	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
