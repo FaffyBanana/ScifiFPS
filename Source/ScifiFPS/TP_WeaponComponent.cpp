@@ -141,10 +141,11 @@ void UTP_WeaponComponent::Fire()
 
 			RaycastShot();
 		}
-		else
+
+		if (InventoryComponent->GetAmmoCount(m_currentWeapon) == 0)
 		{
 			InventoryComponent->ReloadWeapon(m_currentWeapon);
-			Fire(); // TODO: Move to this to reload animation timer -------------
+			//Fire(); // TODO: Move to this to reload animation timer -------------
 		}
 	}
 }

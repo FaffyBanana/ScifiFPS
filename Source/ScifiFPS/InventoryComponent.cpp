@@ -59,17 +59,20 @@ int32 UInventoryComponent::GetTotalAmmoCount(EAmmunitionType ammo) const
 
 void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 {
+	// If reserve is equivelent to the full catridge
 	if (m_totalAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
 	{
 		m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
 		m_totalAmmunitionCount[ammo] -= m_maxAmmunitionInCatridge[ammo];
 	}
 
-	else if ( m_totalAmmunitionCount[ammo] > 0)
+	// If there is some reserve ammo left
+	else if (m_totalAmmunitionCount[ammo] > 0)
 	{
 		m_ammunitionCount[ammo] = m_totalAmmunitionCount[ammo];
 		m_totalAmmunitionCount[ammo] = 0;
 	}
+
 }
 
 

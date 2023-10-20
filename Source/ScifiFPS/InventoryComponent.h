@@ -64,7 +64,7 @@ public:
 	int8 DefaultTotalPrimaryAmmunition = 120;
 
 	UPROPERTY()
-	int8 DefaultTotalSecondaryAmmunition = 80;
+	int8 DefaultTotalSecondaryAmmunition = 10;
 };
 
 /*****************************************************************************************************
