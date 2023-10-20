@@ -42,6 +42,7 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
 	}
 
+	m_bCanShoot = true;
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -115,41 +116,6 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 	SwitchToNextWeapon();
 }
 
-void UTP_WeaponComponent::Fire()
-{
-	if (Character == nullptr || Character->GetController() == nullptr)
-	{
-		return;
-	}
-
-	if (InventoryComponent)
-	{
-		if (InventoryComponent->GetAmmoCount(m_currentWeapon) > 0)
-		{
-			InventoryComponent->ConsumeAmmo(m_currentWeapon);
-
-			// Try and play a firing animation if specified
-			if (FireAnimation != nullptr)
-			{
-				// Get the animation object for the arms mesh
-				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-				if (AnimInstance != nullptr)
-				{
-					AnimInstance->Montage_Play(FireAnimation, 1.f);
-				}
-			}
-
-			RaycastShot();
-		}
-
-		if (InventoryComponent->GetAmmoCount(m_currentWeapon) == 0)
-		{
-			InventoryComponent->ReloadWeapon(m_currentWeapon);
-			//Fire(); // TODO: Move to this to reload animation timer -------------
-		}
-	}
-}
-
 void UTP_WeaponComponent::RaycastShot()
 {
 	// Create variables for line trace
@@ -182,8 +148,93 @@ void UTP_WeaponComponent::RaycastShot()
 	}
 }
 
+void UTP_WeaponComponent::Fire()
+{
+	if (Character == nullptr || Character->GetController() == nullptr)
+	{
+		return;
+	}
+
+	if (InventoryComponent)
+	{
+		// If the player has ammunition and can shoot
+		if (!ShouldPlayerReload() && m_bCanShoot)
+		{
+			// Decrement ammunition counter of current weapon
+			InventoryComponent->ConsumeAmmo(m_currentWeapon);
+
+			// Try and play a firing animation if specified
+			if (FireAnimation != nullptr)
+			{
+				// Get the animation object for the arms mesh
+				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+				if (AnimInstance != nullptr)
+				{
+					AnimInstance->Montage_Play(FireAnimation, 1.0f);
+				}
+			}
+
+			// Shoot raycast line
+			RaycastShot();
+		}
+
+		// If the player has no ammunition 
+		if (ShouldPlayerReload() && m_bCanShoot)
+		{
+			// Try and play a reload animation if specified
+			if (ReloadAnimation != nullptr)
+			{
+				// Get the animation object for the arms mesh
+				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+				if (AnimInstance != nullptr)
+				{
+					AnimInstance->Montage_Play(ReloadAnimation, 1.0f);
+				}
+			}
+
+			StartReloadWeaponTimer();
+		}
+	}
+}
+
+void UTP_WeaponComponent::StartReloadWeaponTimer()
+{
+	// Stop the player from shooting
+	m_bCanShoot = false;
+
+	// Start reload timer
+	Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, 1.0f, true); // TODO: Change timer to however long the animation takes
+}
+
+void UTP_WeaponComponent::ClearReloadWeaponTimer()
+{
+	// Clear reload timer
+	Character->GetWorldTimerManager().ClearTimer(m_handleReload);
+}
+
+bool UTP_WeaponComponent::ShouldPlayerReload() const
+{
+	// Has the player run out of ammunition 
+	return InventoryComponent->GetAmmoCount(m_currentWeapon) == 0 ?  true : false;
+}
+
+void UTP_WeaponComponent::ReloadWeapon()
+{
+	// Calculate the ammunition counter of the weapon after reload
+	InventoryComponent->ReloadWeapon(m_currentWeapon);
+	
+	// Clear the reload timer
+	ClearReloadWeaponTimer();
+
+	// Allow the player to shoot again
+	m_bCanShoot = true;
+}
+
+
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
+	ClearReloadWeaponTimer();
+
 	/* Calculate correct weapon index to switch to */
 	float tempIndex = index.Get<float>();
 	int tempValue = UKismetMathLibrary::FTrunc(tempIndex);
@@ -202,8 +253,12 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 			if player has scrolled up go back to the bottom of the array */
 		m_weaponIndex < 0 ? m_weaponIndex = m_gunArray.Num() - 1 : m_weaponIndex = 0;
 	}
+
 	SwitchToNextWeapon();
 
+	StopFire();
+
+	ShouldPlayerReload() ? StartReloadWeaponTimer() : m_bCanShoot = true;
 }
 
 int32 UTP_WeaponComponent::GetCurrentAmmo() const
@@ -252,7 +307,6 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->SetVisibility(true);
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
-	StopFire();
 }
 
 void UTP_WeaponComponent::StartFire()

@@ -80,6 +80,14 @@ private:
 	/* Handles the switching of weapons */
 	void SwitchToNextWeapon();
 
+	void ReloadWeapon();
+
+	void StartReloadWeaponTimer();
+
+	void ClearReloadWeaponTimer();
+
+	bool ShouldPlayerReload() const;
+
 public:
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -88,6 +96,10 @@ public:
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
+	/** AnimMontage to play each time we reload */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UAnimMontage* ReloadAnimation;
 
 	/* Seconds to wait between shots */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -146,5 +158,10 @@ private:
 	/* References to weapons */
 	TSubclassOf<AGunBase> PrimaryWeaponRef;
 	TSubclassOf<AGunBase> SecondaryWeaponRef;
+
+	bool m_bCanShoot;
+
+	FTimerHandle m_handleReload;
+
 
 };
