@@ -9,6 +9,7 @@
 #include "HealthComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "InventoryComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -44,6 +45,9 @@ class AScifiFPSCharacter : public ACharacter
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	class USpringArmComponent* SpringArmComponent;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
