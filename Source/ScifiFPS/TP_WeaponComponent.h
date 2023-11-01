@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetTotalCurrentAmmo() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetIsFiring() const;
+
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -93,13 +96,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	USoundBase* FireSound;
 
-	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
+	///** AnimMontage to play each time we fire */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//UAnimMontage* FireAnimation;
 
-	/** AnimMontage to play each time we reload */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* ReloadAnimation;
+	///** AnimMontage to play each time we reload */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//UAnimMontage* ReloadAnimation;
 
 	/* Seconds to wait between shots */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -160,6 +163,8 @@ private:
 	TSubclassOf<AGunBase> SecondaryWeaponRef;
 
 	bool m_bCanShoot;
+
+	bool m_bIsFiring;
 
 	FTimerHandle m_handleReload;
 

@@ -43,6 +43,8 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	}
 
 	m_bCanShoot = true;
+	m_bIsFiring = false;
+
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -160,37 +162,34 @@ void UTP_WeaponComponent::Fire()
 		// If the player has ammunition and can shoot
 		if (!ShouldPlayerReload() && m_bCanShoot)
 		{
+			m_bIsFiring = true;
+
 			// Decrement ammunition counter of current weapon
 			InventoryComponent->ConsumeAmmo(m_currentWeapon);
 
-			// Try and play a firing animation if specified
-			if (FireAnimation != nullptr)
-			{
-				// Get the animation object for the arms mesh
-				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-				if (AnimInstance != nullptr)
-				{
-					AnimInstance->Montage_Play(FireAnimation, 1.0f);
-				}
-			}
-
 			// Shoot raycast line
 			RaycastShot();
+
+			// Try and play the sound if specified
+			if (FireSound != nullptr)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
+			}
 		}
 
 		// If the player has no ammunition 
 		if (ShouldPlayerReload() && m_bCanShoot)
 		{
-			// Try and play a reload animation if specified
-			if (ReloadAnimation != nullptr)
-			{
-				// Get the animation object for the arms mesh
-				UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-				if (AnimInstance != nullptr)
-				{
-					AnimInstance->Montage_Play(ReloadAnimation, 1.0f);
-				}
-			}
+			//// Try and play a reload animation if specified
+			//if (ReloadAnimation != nullptr)
+			//{
+			//	// Get the animation object for the arms mesh
+			//	UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+			//	if (AnimInstance != nullptr)
+			//	{
+			//		AnimInstance->Montage_Play(ReloadAnimation, 1.0f);
+			//	}
+			//}
 
 			StartReloadWeaponTimer();
 		}
@@ -271,6 +270,11 @@ int32 UTP_WeaponComponent::GetTotalCurrentAmmo() const
 	return InventoryComponent->GetTotalAmmoCount(m_currentWeapon);
 }
 
+bool UTP_WeaponComponent::GetIsFiring() const
+{
+	return m_bIsFiring;
+}
+
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
 	/* Set gun actors as invisible */
@@ -311,6 +315,7 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 
 void UTP_WeaponComponent::StartFire()
 {
+
 	// Fire weapon 
 	Fire();
 	
@@ -324,6 +329,7 @@ void UTP_WeaponComponent::StopFire()
 	//if (m_isAutomaticMap[m_currentWeapon])
 	// Clear automatic shooting timer 
 	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
+	m_bIsFiring = false;
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
