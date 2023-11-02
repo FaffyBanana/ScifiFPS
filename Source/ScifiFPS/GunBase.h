@@ -40,6 +40,11 @@ public:
 	/* Returns the skeletal mesh of the gun */
 	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
 
+public:
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	USoundBase* FireSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -44,6 +44,9 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	m_bCanShoot = true;
 	m_bIsFiring = false;
+	m_bIsReloading = false;
+
+	m_reloadTime = 2.25f;
 
 }
 
@@ -171,26 +174,12 @@ void UTP_WeaponComponent::Fire()
 			RaycastShot();
 
 			// Try and play the sound if specified
-			if (FireSound != nullptr)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
-			}
+			PlayGunShotSFX();
 		}
 
 		// If the player has no ammunition 
 		if (ShouldPlayerReload() && m_bCanShoot)
 		{
-			//// Try and play a reload animation if specified
-			//if (ReloadAnimation != nullptr)
-			//{
-			//	// Get the animation object for the arms mesh
-			//	UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-			//	if (AnimInstance != nullptr)
-			//	{
-			//		AnimInstance->Montage_Play(ReloadAnimation, 1.0f);
-			//	}
-			//}
-
 			StartReloadWeaponTimer();
 		}
 	}
@@ -201,12 +190,15 @@ void UTP_WeaponComponent::StartReloadWeaponTimer()
 	// Stop the player from shooting
 	m_bCanShoot = false;
 
+	m_bIsReloading = true;
+
 	// Start reload timer
-	Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, 1.0f, true); // TODO: Change timer to however long the animation takes
+	Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, m_reloadTime, true); 
 }
 
 void UTP_WeaponComponent::ClearReloadWeaponTimer()
 {
+
 	// Clear reload timer
 	Character->GetWorldTimerManager().ClearTimer(m_handleReload);
 }
@@ -217,6 +209,12 @@ bool UTP_WeaponComponent::ShouldPlayerReload() const
 	return InventoryComponent->GetAmmoCount(m_currentWeapon) == 0 ?  true : false;
 }
 
+void UTP_WeaponComponent::PlayGunShotSFX()
+{
+	if (m_gunArray[m_weaponIndex]->FireSound != nullptr)
+		UGameplayStatics::PlaySoundAtLocation(this, m_gunArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
+}
+
 void UTP_WeaponComponent::ReloadWeapon()
 {
 	// Calculate the ammunition counter of the weapon after reload
@@ -224,6 +222,8 @@ void UTP_WeaponComponent::ReloadWeapon()
 	
 	// Clear the reload timer
 	ClearReloadWeaponTimer();
+
+	m_bIsReloading = false;
 
 	// Allow the player to shoot again
 	m_bCanShoot = true;
@@ -273,6 +273,11 @@ int32 UTP_WeaponComponent::GetTotalCurrentAmmo() const
 bool UTP_WeaponComponent::GetIsFiring() const
 {
 	return m_bIsFiring;
+}
+
+bool UTP_WeaponComponent::GetIsReloading() const
+{
+	return m_bIsReloading;
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()

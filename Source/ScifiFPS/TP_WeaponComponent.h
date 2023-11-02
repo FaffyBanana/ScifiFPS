@@ -57,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsFiring() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetIsReloading() const;
+
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -91,10 +94,12 @@ private:
 
 	bool ShouldPlayerReload() const;
 
+	void PlayGunShotSFX();
+
 public:
-	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	USoundBase* FireSound;
+	///** Sound to play each time we fire */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//USoundBase* FireSound;
 
 	///** AnimMontage to play each time we fire */
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -165,6 +170,12 @@ private:
 	bool m_bCanShoot;
 
 	bool m_bIsFiring;
+
+	/* Bool for if the player is reloading or not
+					(Used for animations) */
+	bool m_bIsReloading;
+
+	float m_reloadTime;
 
 	FTimerHandle m_handleReload;
 
