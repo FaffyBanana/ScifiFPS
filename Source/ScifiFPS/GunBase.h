@@ -38,6 +38,7 @@ public:
 	// Sets default values for this actor's properties
 	AGunBase();
 
+	UFUNCTION(BlueprintCallable)
 	/* Returns the skeletal mesh of the gun */
 	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
 
