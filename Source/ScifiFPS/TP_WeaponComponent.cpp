@@ -211,8 +211,8 @@ bool UTP_WeaponComponent::ShouldPlayerReload() const
 
 void UTP_WeaponComponent::PlayGunShotSFX()
 {
-	if (m_gunArray[m_weaponIndex]->FireSound != nullptr)
-		UGameplayStatics::PlaySoundAtLocation(this, m_gunArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
+	//if (m_gunArray[m_weaponIndex]->FireSound != nullptr)
+		//UGameplayStatics::PlaySoundAtLocation(this, m_gunArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
 }
 
 void UTP_WeaponComponent::ReloadWeapon()

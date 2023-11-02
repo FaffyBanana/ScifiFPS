@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundBase.h"
 #include "GunBase.generated.h"
 
 
@@ -41,9 +42,9 @@ public:
 	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
 
 public:
-	/** Sound to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	USoundBase* FireSound;
+	///** Sound to play each time we fire */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//USoundBase* FireSound;
 
 protected:
 	// Called when the game starts or when spawned
