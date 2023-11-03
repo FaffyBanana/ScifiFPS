@@ -96,6 +96,9 @@ private:
 
 	void PlayGunShotSFX();
 
+	void AimInSight();
+	void AimOutSight();
+
 public:
 	///** Sound to play each time we fire */
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -127,6 +130,14 @@ public:
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
+
+	/** Reload Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* ReloadAction;
+
+	/** Aiming (ADS) Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* AimDownSightAction;
 
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

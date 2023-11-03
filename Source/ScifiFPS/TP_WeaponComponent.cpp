@@ -115,6 +115,10 @@ void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::StartFire);
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
 			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchWeapons);
+			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::StartReloadWeaponTimer);
+
+			EnhancedInputComponent->BindAction(AimDownSightAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::AimInSight);
+			EnhancedInputComponent->BindAction(AimDownSightAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::AimOutSight);
 		}
 	}
 
@@ -163,7 +167,7 @@ void UTP_WeaponComponent::Fire()
 	if (InventoryComponent)
 	{
 		// If the player has ammunition and can shoot
-		if (!ShouldPlayerReload() && m_bCanShoot)
+		if (InventoryComponent->GetAmmoCount(m_currentWeapon) != 0 && m_bCanShoot)
 		{
 			m_bIsFiring = true;
 
@@ -178,7 +182,7 @@ void UTP_WeaponComponent::Fire()
 		}
 
 		// If the player has no ammunition 
-		if (ShouldPlayerReload() && m_bCanShoot)
+		if (InventoryComponent->GetAmmoCount(m_currentWeapon) == 0 && m_bCanShoot)
 		{
 			StartReloadWeaponTimer();
 		}
@@ -187,13 +191,16 @@ void UTP_WeaponComponent::Fire()
 
 void UTP_WeaponComponent::StartReloadWeaponTimer()
 {
-	// Stop the player from shooting
-	m_bCanShoot = false;
+	if (ShouldPlayerReload() && m_bCanShoot)
+	{
+		// Stop the player from shooting
+		m_bCanShoot = false;
 
-	m_bIsReloading = true;
+		m_bIsReloading = true;
 
-	// Start reload timer
-	Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, m_reloadTime, true); 
+		// Start reload timer
+		Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, m_reloadTime, true);
+	}
 }
 
 void UTP_WeaponComponent::ClearReloadWeaponTimer()
@@ -205,14 +212,25 @@ void UTP_WeaponComponent::ClearReloadWeaponTimer()
 
 bool UTP_WeaponComponent::ShouldPlayerReload() const
 {
-	// Has the player run out of ammunition 
-	return InventoryComponent->GetAmmoCount(m_currentWeapon) == 0 ?  true : false;
+	if(InventoryComponent->GetTotalAmmoCount(m_currentWeapon) != 0)
+		// Has the player run out of ammunition 
+		return InventoryComponent->GetAmmoCount(m_currentWeapon) < InventoryComponent->GetMaxAmmoInCatridgeCount(m_currentWeapon) ? true : false;
+
+	return false;
 }
 
 void UTP_WeaponComponent::PlayGunShotSFX()
 {
 	if (m_gunArray[m_weaponIndex]->FireSound != nullptr)
 		UGameplayStatics::PlaySoundAtLocation(this, m_gunArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
+}
+
+void UTP_WeaponComponent::AimInSight()
+{
+}
+
+void UTP_WeaponComponent::AimOutSight()
+{
 }
 
 void UTP_WeaponComponent::ReloadWeapon()

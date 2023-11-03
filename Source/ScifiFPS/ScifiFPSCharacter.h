@@ -62,6 +62,11 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* SprintAction;
+
+	
+
 	/** Weapon component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* WeaponComponent;
@@ -117,6 +122,12 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Called for sprint input */
+	void Sprint();
+
+	/** Called for sprint input */
+	void StopSprint();
 
 protected:
 	// APawn interface

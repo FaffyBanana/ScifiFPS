@@ -109,6 +109,8 @@ public:
 
 	int32 GetTotalAmmoCount(EAmmunitionType ammo) const;
 
+	int32 GetMaxAmmoInCatridgeCount(EAmmunitionType ammo) const;
+
 	/* Reloads the weapon by resetting the count back to it's max ammunition */
 	void ReloadWeapon(EAmmunitionType ammo);
 

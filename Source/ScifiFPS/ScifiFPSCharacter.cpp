@@ -8,6 +8,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "GameFramework/GameModeBase.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 
@@ -40,9 +41,6 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	
-	
-
 	// Create a weapon component 
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
 
@@ -58,6 +56,8 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	{
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
+
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 
 	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
@@ -101,15 +101,21 @@ void AScifiFPSCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		//Jumping
+		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-		//Moving
+		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AScifiFPSCharacter::Move);
 
-		//Looking
+		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AScifiFPSCharacter::Look);
+
+		// Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AScifiFPSCharacter::Sprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AScifiFPSCharacter::StopSprint);
+
+		
 	}
 }
 
@@ -159,6 +165,16 @@ void AScifiFPSCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AScifiFPSCharacter::Sprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+}
+
+void AScifiFPSCharacter::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 }
 
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)
