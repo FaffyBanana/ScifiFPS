@@ -107,8 +107,10 @@ public:
 	/* Return the ammunition count */
 	int32 GetAmmoCount(EAmmunitionType ammo) const;
 
+	/* Return the total ammunition count */
 	int32 GetTotalAmmoCount(EAmmunitionType ammo) const;
 
+	/* Get the maximum ammunition count of the weapon */
 	int32 GetMaxAmmoInCatridgeCount(EAmmunitionType ammo) const;
 
 	/* Reloads the weapon by resetting the count back to it's max ammunition */

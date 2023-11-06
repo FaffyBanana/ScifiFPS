@@ -41,22 +41,26 @@ public:
 	UTP_WeaponComponent();
 
 	/** Attaches the actor to a FirstPersonCharacter */
-	UFUNCTION(BlueprintCallable, Category="Weapon")
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
 
 	/* Calculate the correct weapon index */
 	UFUNCTION()
 	void SwitchWeapons(const FInputActionValue& index);
 
+	/* Get the current ammunition count of the current weapon */
 	UFUNCTION(BlueprintCallable)
 	int32 GetCurrentAmmo() const;
 
+	/* Get the total ammunition count of the current weapon */
 	UFUNCTION(BlueprintCallable)
 	int32 GetTotalCurrentAmmo() const;
 
+	/* Get boolean to see if player is firing */
 	UFUNCTION(BlueprintCallable)
 	bool GetIsFiring() const;
 
+	/* Get the boolean to see if player is reloading */
 	UFUNCTION(BlueprintCallable)
 	bool GetIsReloading() const;
 
@@ -86,32 +90,28 @@ private:
 	/* Handles the switching of weapons */
 	void SwitchToNextWeapon();
 
+	/* Handles the reloading of the current weapon */
 	void ReloadWeapon();
 
+	/* Start the reload weapon timer, also sets booleans to stop shooting and start reloading */
 	void StartReloadWeaponTimer();
 
+	/* Clear the reload weapon timer */
 	void ClearReloadWeaponTimer();
 
+	/* Evaluate if the player should reload or not */
 	bool ShouldPlayerReload() const;
 
+	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
 
+	/* Aim down scope of gun */
 	void AimInSight();
+
+	/* Aim out of scope to go back to hip fire */
 	void AimOutSight();
 
 public:
-	///** Sound to play each time we fire */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	//USoundBase* FireSound;
-
-	///** AnimMontage to play each time we fire */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	//UAnimMontage* FireAnimation;
-
-	///** AnimMontage to play each time we reload */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	//UAnimMontage* ReloadAnimation;
-
 	/* Seconds to wait between shots */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TimeBetweenShots;
@@ -120,6 +120,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FVector MuzzleOffset;
 
+private:
 	/** Line trace distance (how far the player can shoot)*/
 	float ShootingDistance;
 
@@ -144,11 +145,11 @@ public:
 	class UInputAction* SwitchWeaponsAction;
 
 	/* Primary gun */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AGunBase* PrimaryGun;
 
 	/* Secondary gun */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AGunBase* SecondaryGun;
 	
 private:
@@ -178,17 +179,31 @@ private:
 	TSubclassOf<AGunBase> PrimaryWeaponRef;
 	TSubclassOf<AGunBase> SecondaryWeaponRef;
 
+	/* If player can shoot */
 	bool m_bCanShoot;
 
+	/* Is player firing weapons (Used for animations) */
 	bool m_bIsFiring;
 
 	/* Bool for if the player is reloading or not
 					(Used for animations) */
 	bool m_bIsReloading;
 
+	/* How long it takes to reload */
 	float m_reloadTime;
 
+	/* Handle for reload timer */
 	FTimerHandle m_handleReload;
-
-
 };
+
+	// /** Sound to play each time we fire */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//USoundBase* FireSound;
+	//
+	// /** AnimMontage to play each time we fire */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//UAnimMontage* FireAnimation;
+	//
+	// /** AnimMontage to play each time we reload */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//UAnimMontage* ReloadAnimation;

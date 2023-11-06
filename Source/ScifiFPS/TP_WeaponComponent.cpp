@@ -42,12 +42,13 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
 	}
 
+	/* Set booleans */
 	m_bCanShoot = true;
 	m_bIsFiring = false;
 	m_bIsReloading = false;
 
+	/* Default reload time */
 	m_reloadTime = 2.25f;
-
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -55,7 +56,6 @@ void UTP_WeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
-
 
 	/* Spawn all guns */
 	FVector location(0.0f, 0.0f, 0.0f);
@@ -152,7 +152,7 @@ void UTP_WeaponComponent::RaycastShot()
 		if (enemyManager)
 		{
 			enemyManager->GetHealthComponent()->TakeDamage();
-			//DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
+			DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
 		}
 	}
 }
@@ -167,7 +167,7 @@ void UTP_WeaponComponent::Fire()
 	if (InventoryComponent)
 	{
 		// If the player has ammunition and can shoot
-		if (InventoryComponent->GetAmmoCount(m_currentWeapon) != 0 && m_bCanShoot)
+		if (GetCurrentAmmo() != 0 && m_bCanShoot)
 		{
 			m_bIsFiring = true;
 
@@ -182,9 +182,11 @@ void UTP_WeaponComponent::Fire()
 		}
 
 		// If the player has no ammunition 
-		if (InventoryComponent->GetAmmoCount(m_currentWeapon) == 0 && m_bCanShoot)
+		if (GetCurrentAmmo() == 0 && m_bCanShoot)
 		{
-			StartReloadWeaponTimer();
+			// If there is no reserve ammo stop shooting
+				// Else start reloading
+			GetTotalCurrentAmmo() == 0 ? StopFire() : StartReloadWeaponTimer();
 		}
 	}
 }
@@ -205,14 +207,13 @@ void UTP_WeaponComponent::StartReloadWeaponTimer()
 
 void UTP_WeaponComponent::ClearReloadWeaponTimer()
 {
-
 	// Clear reload timer
 	Character->GetWorldTimerManager().ClearTimer(m_handleReload);
 }
 
 bool UTP_WeaponComponent::ShouldPlayerReload() const
 {
-	if(InventoryComponent->GetTotalAmmoCount(m_currentWeapon) != 0)
+	if (InventoryComponent->GetTotalAmmoCount(m_currentWeapon) != 0)
 		// Has the player run out of ammunition 
 		return InventoryComponent->GetAmmoCount(m_currentWeapon) < InventoryComponent->GetMaxAmmoInCatridgeCount(m_currentWeapon) ? true : false;
 
@@ -338,7 +339,6 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 
 void UTP_WeaponComponent::StartFire()
 {
-
 	// Fire weapon 
 	Fire();
 	
@@ -349,7 +349,6 @@ void UTP_WeaponComponent::StartFire()
 
 void UTP_WeaponComponent::StopFire()
 {
-	//if (m_isAutomaticMap[m_currentWeapon])
 	// Clear automatic shooting timer 
 	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
 	m_bIsFiring = false;

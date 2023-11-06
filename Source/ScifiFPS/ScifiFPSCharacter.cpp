@@ -17,7 +17,6 @@
 
 AScifiFPSCharacter::AScifiFPSCharacter()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Character doesnt have a rifle at start
@@ -57,7 +56,12 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
 
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	/* Character movement defaults */
+	m_defaultWalkSpeed = 500.0f;
+	m_defaultSprintSpeed = 1000.0f;
+
+	// Set default walk speed
+	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
 
 	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
@@ -114,8 +118,6 @@ void AScifiFPSCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		// Sprinting
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AScifiFPSCharacter::Sprint);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AScifiFPSCharacter::StopSprint);
-
-		
 	}
 }
 
@@ -167,14 +169,14 @@ void AScifiFPSCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AScifiFPSCharacter::Sprint()
+void AScifiFPSCharacter::Sprint() 
 {
-	GetCharacterMovement()->MaxWalkSpeed = 1000.0f;
+	GetCharacterMovement()->MaxWalkSpeed = m_defaultSprintSpeed;
 }
 
 void AScifiFPSCharacter::StopSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
 }
 
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)

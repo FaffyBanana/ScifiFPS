@@ -42,6 +42,67 @@ class AScifiFPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+public:
+	/* Constructor */
+	AScifiFPSCharacter();
+
+	/** Setter to set the bool */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void SetHasRifle(const bool bNewHasRifle);
+
+	/** Getter for the bool */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	bool GetHasRifle() const;
+
+	/* Respawn and reset the player */
+	UFUNCTION(BlueprintCallable)
+	void Respawn();
+
+	/* Return Health Component */
+	UHealthComponent* GetHealthComponent() const;
+
+	/* Return Inventory Component */
+	UInventoryComponent* GetInventoryComponent() const;
+
+	/* Return Weapon Component */
+	UTP_WeaponComponent* GetWeaponComponent() const;
+
+	/** Returns Mesh1P subobject **/
+	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+
+	/** Returns FirstPersonCameraComponent subobject **/
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+public:
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
+
+protected:
+	/* Begin Play event */
+	virtual void BeginPlay();
+
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
+
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
+
+	/** Called for sprint input */
+	void Sprint();
+
+	/** Called for sprint input */
+	void StopSprint();
+
+protected:
+	// APawn interface
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+
+	// End of APawn interface
+	virtual void Tick(float DeltaTime) override;
+
+
+private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
 	USkeletalMeshComponent* Mesh1P;
@@ -62,10 +123,9 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
+	/** Sprint Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SprintAction;
-
-	
 
 	/** Weapon component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -79,68 +139,17 @@ class AScifiFPSCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
 
-public:
-	AScifiFPSCharacter();
-
-protected:
-	virtual void BeginPlay();
-
-public:
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
-
 	/** Bool for AnimBP to switch to another animation set */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	bool bHasRifle;
 
-	/** Setter to set the bool */
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void SetHasRifle(const bool bNewHasRifle);
+	/* Default Walk Speed */
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float m_defaultWalkSpeed;
 
-	/** Getter for the bool */
-	UFUNCTION(BlueprintCallable, Category = Weapon)
-	bool GetHasRifle() const;
-
-	/* Return Health Component */
-	UHealthComponent* GetHealthComponent() const;
-
-	UInventoryComponent* GetInventoryComponent() const;
-
-
-	/* Return Weapon Component */
-	UTP_WeaponComponent* GetWeaponComponent() const;
-
-	/* Respawn and reset the player */
-	UFUNCTION(BlueprintCallable)
-	void Respawn();
-
-
-protected:
-	/** Called for movement input */
-	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-
-	/** Called for sprint input */
-	void Sprint();
-
-	/** Called for sprint input */
-	void StopSprint();
-
-protected:
-	// APawn interface
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
-
-	// End of APawn interface
-	virtual void Tick(float DeltaTime) override;
-
-public:
-	/** Returns Mesh1P subobject **/
-	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
-	/** Returns FirstPersonCameraComponent subobject **/
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	/* Default Sprint speed*/
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float m_defaultSprintSpeed;
 
 private:
 	/* Game Over Menu */
@@ -150,5 +159,6 @@ private:
 	/*TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
 	UUserWidget* PlayerHUDWidget;*/
 
+	
 };
 

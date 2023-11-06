@@ -23,13 +23,11 @@ USkeletalMeshComponent* AGunBase::GetGunSkeletalMeshComponent() const
 void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AGunBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 

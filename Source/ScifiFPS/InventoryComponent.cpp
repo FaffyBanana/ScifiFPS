@@ -33,13 +33,45 @@ void UInventoryComponent::BeginPlay()
 	
 }
 
-
 // Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
+{
+	/* If there is enough reserve ammunition to refill a full magazine */
+	if (m_totalAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
+	{
+		m_totalAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]);
+		m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
+	}
+
+	/* If there isn't enough reserve ammunition to refill a full magazine */
+	else if (m_totalAmmunitionCount[ammo] < m_maxAmmunitionInCatridge[ammo] && m_totalAmmunitionCount[ammo] > 0)
+	{
+		/* If there isn't enough reserve for a full clip */
+		if (m_totalAmmunitionCount[ammo] < (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]))
+		{
+			m_ammunitionCount[ammo] += m_totalAmmunitionCount[ammo];
+			m_totalAmmunitionCount[ammo] = 0;
+		}
+		/* If there is enough reserve for a full clip */
+		else
+		{
+			m_totalAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]);
+			m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
+		}
+	}
+
+	/* If the total ammunition goes below zero */
+	else
+	{
+		m_totalAmmunitionCount[ammo] = 0;
+	}
 }
 
 void UInventoryComponent::ConsumeAmmo(EAmmunitionType ammo)
@@ -62,30 +94,5 @@ int32 UInventoryComponent::GetMaxAmmoInCatridgeCount(EAmmunitionType ammo) const
 	return m_maxAmmunitionInCatridge[ammo];
 }
 
-
-
-void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
-{
-	//// If reserve is equivelent to the full catridge
-	//if (m_totalAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
-	//{
-	//	m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
-	//	m_totalAmmunitionCount[ammo] -= m_maxAmmunitionInCatridge[ammo];
-	//}
-
-	//// If there is some reserve ammo left
-	//else if (m_totalAmmunitionCount[ammo] > 0)
-	//{
-	//	m_ammunitionCount[ammo] = m_totalAmmunitionCount[ammo];
-	//	m_totalAmmunitionCount[ammo] = 0;
-	//}
-
-	if(m_totalAmmunitionCount[ammo] > 0)
-	{
-		m_totalAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]);
-		m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
-	}
-
-}
 
 
