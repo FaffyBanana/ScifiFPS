@@ -55,16 +55,16 @@ struct FAmmunition
 
 public:
 	UPROPERTY()
-	int8 DefaultMaxPrimaryAmmunition = 30;
+	int8 DefaultMaxPrimaryAmmunition = 30; // Default maximum ammunition in primary weapon
 
 	UPROPERTY()
-	int8 DefaultSecondaryAmmunition = 30;
+	int8 DefaultMaxSecondaryAmmunition = 30; // Default maximum ammunition in secondary waepon
 
 	UPROPERTY()
-	int8 DefaultTotalPrimaryAmmunition = 120;
+	int8 DefaultTotalPrimaryAmmunition = 120; // Default reserve ammuntion in primary weapon
 
 	UPROPERTY()
-	int8 DefaultTotalSecondaryAmmunition = 80;
+	int8 DefaultTotalSecondaryAmmunition = 80; // Defaul reserve ammunition in secondary weapon
 };
 
 /*****************************************************************************************************

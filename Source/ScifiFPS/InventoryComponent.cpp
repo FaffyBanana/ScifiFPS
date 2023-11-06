@@ -12,7 +12,7 @@ UInventoryComponent::UInventoryComponent()
 
 	// Set max ammunition of each weapon
 	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
-	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultSecondaryAmmunition);
+	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultMaxSecondaryAmmunition);
 
 	// Set ammunition count of each weapon
 	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Primary]);

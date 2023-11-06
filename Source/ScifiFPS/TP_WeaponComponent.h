@@ -64,6 +64,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsReloading() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetIsAimingIn() const;
+
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -188,6 +191,8 @@ private:
 	/* Bool for if the player is reloading or not
 					(Used for animations) */
 	bool m_bIsReloading;
+
+	bool m_bIsAimingIn;
 
 	/* How long it takes to reload */
 	float m_reloadTime;

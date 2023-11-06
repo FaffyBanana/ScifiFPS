@@ -46,6 +46,7 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	m_bCanShoot = true;
 	m_bIsFiring = false;
 	m_bIsReloading = false;
+	m_bIsAimingIn = false;
 
 	/* Default reload time */
 	m_reloadTime = 2.25f;
@@ -228,10 +229,12 @@ void UTP_WeaponComponent::PlayGunShotSFX()
 
 void UTP_WeaponComponent::AimInSight()
 {
+	m_bIsAimingIn = true;
 }
 
 void UTP_WeaponComponent::AimOutSight()
 {
+	m_bIsAimingIn = false;
 }
 
 void UTP_WeaponComponent::ReloadWeapon()
@@ -297,6 +300,11 @@ bool UTP_WeaponComponent::GetIsFiring() const
 bool UTP_WeaponComponent::GetIsReloading() const
 {
 	return m_bIsReloading;
+}
+
+bool UTP_WeaponComponent::GetIsAimingIn() const
+{
+	return m_bIsAimingIn;
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
