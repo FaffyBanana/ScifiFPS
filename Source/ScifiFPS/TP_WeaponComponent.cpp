@@ -230,11 +230,14 @@ void UTP_WeaponComponent::PlayGunShotSFX()
 void UTP_WeaponComponent::AimInSight()
 {
 	m_bIsAimingIn = true;
+	Character->SwitchADS(m_bIsAimingIn);
 }
 
 void UTP_WeaponComponent::AimOutSight()
 {
 	m_bIsAimingIn = false;
+	Character->SwitchADS(m_bIsAimingIn);
+
 }
 
 void UTP_WeaponComponent::ReloadWeapon()

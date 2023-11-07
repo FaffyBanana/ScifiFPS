@@ -31,6 +31,10 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
+	ADSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
+	ADSCameraComponent->SetupAttachment(GetCapsuleComponent());
+	ADSCameraComponent->bUsePawnControlRotation = true;
+
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
@@ -202,4 +206,18 @@ UInventoryComponent* AScifiFPSCharacter::GetInventoryComponent() const
 UTP_WeaponComponent* AScifiFPSCharacter::GetWeaponComponent() const
 {
 	return WeaponComponent;
+}
+
+void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
+{
+	if(isAimingIn)
+	{
+		FirstPersonCameraComponent->Deactivate();
+		ADSCameraComponent->Activate();
+	}
+	else
+	{
+		FirstPersonCameraComponent->Activate();
+		ADSCameraComponent->Deactivate();
+	}
 }
