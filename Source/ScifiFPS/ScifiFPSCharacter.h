@@ -101,7 +101,6 @@ protected:
 	// End of APawn interface
 	virtual void Tick(float DeltaTime) override;
 
-
 private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)

@@ -33,12 +33,12 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	
 }
 
-int UHealthComponent::GetHealth()
+int32 UHealthComponent::GetHealth()const
 {
 	return m_health;
 }
 
-int UHealthComponent::GetMaxHealth()
+int32 UHealthComponent::GetMaxHealth() const
 {
 	return m_maxHealth;
 }
@@ -57,7 +57,7 @@ void UHealthComponent::ResetHealth()
 	m_health = m_maxHealth;
 }
 
-UHealthComponent* UHealthComponent::GetHealthComponent()
+UHealthComponent* UHealthComponent::GetHealthComponent() const
 {
 	return nullptr;
 }

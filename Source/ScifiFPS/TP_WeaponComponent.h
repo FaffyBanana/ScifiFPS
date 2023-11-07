@@ -188,10 +188,11 @@ private:
 	/* Is player firing weapons (Used for animations) */
 	bool m_bIsFiring;
 
-	/* Bool for if the player is reloading or not
+	/* Bool for if the character is reloading or not
 					(Used for animations) */
 	bool m_bIsReloading;
 
+	/* Bool for if the character is aiming in or not */
 	bool m_bIsAimingIn;
 
 	/* How long it takes to reload */

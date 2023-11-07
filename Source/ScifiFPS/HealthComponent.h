@@ -25,10 +25,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	int GetHealth();
+	int32 GetHealth() const;
 
 	UFUNCTION(BlueprintCallable)
-	int GetMaxHealth();
+	int32 GetMaxHealth() const;
 
 	UFUNCTION(BlueprintCallable)
 	void TakeDamage();
@@ -36,10 +36,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetHealth();
 
-	UHealthComponent* GetHealthComponent();
+	UHealthComponent* GetHealthComponent() const;
 
 private:
-	int m_health;
-	int m_maxHealth;
+	int32 m_health; // Current health
+	int32 m_maxHealth; // Maximum health amount
 		
 };
