@@ -201,6 +201,8 @@ void UTP_WeaponComponent::StartReloadWeaponTimer()
 
 		m_bIsReloading = true;
 
+		AimOutSight();
+
 		// Start reload timer
 		Character->GetWorldTimerManager().SetTimer(m_handleReload, this, &UTP_WeaponComponent::ReloadWeapon, m_reloadTime, true);
 	}
@@ -229,12 +231,16 @@ void UTP_WeaponComponent::PlayGunShotSFX()
 
 void UTP_WeaponComponent::AimInSight()
 {
-	m_bIsAimingIn = true;
-	Character->SwitchADS(m_bIsAimingIn);
+	if (!m_bIsReloading)
+	{
+		m_bIsAimingIn = true;
+		Character->SwitchADS(m_bIsAimingIn);
+	}
 }
 
 void UTP_WeaponComponent::AimOutSight()
 {
+	
 	m_bIsAimingIn = false;
 	Character->SwitchADS(m_bIsAimingIn);
 

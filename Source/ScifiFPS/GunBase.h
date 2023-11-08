@@ -29,10 +29,6 @@ UCLASS()
 class SCIFIFPS_API AGunBase : public AActor
 {
 	GENERATED_BODY()
-	
-	/** Skeletal mesh of weapon */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	USkeletalMeshComponent* GunSkeletalMeshComponent;
 
 public:	
 	// Sets default values for this actor's properties
@@ -55,4 +51,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+private:
+	/** Skeletal mesh of weapon */
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	USkeletalMeshComponent* GunSkeletalMeshComponent;
 };
