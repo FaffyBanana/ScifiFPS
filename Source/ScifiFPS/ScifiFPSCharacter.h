@@ -73,6 +73,7 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	/* Switch to ADS camera */
 	void SwitchADS(bool isAimingIn);
 
 public:

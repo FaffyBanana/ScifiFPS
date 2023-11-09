@@ -32,7 +32,8 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
 	ADSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
-	ADSCameraComponent->SetupAttachment(FirstPersonCameraComponent);
+	ADSCameraComponent->SetupAttachment(GetCapsuleComponent());
+	ADSCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	ADSCameraComponent->bUsePawnControlRotation = true;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
@@ -43,8 +44,6 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	Mesh1P->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
-
-	
 
 	// Create a weapon component 
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
@@ -74,7 +73,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	{
 		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
 	}*/
-
+	FirstPersonCameraComponent->Activate();
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -185,6 +184,28 @@ void AScifiFPSCharacter::StopSprint()
 	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
 }
 
+void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
+{
+	//const FTransform SocketTransform = GetMesh1P()->GetSocketTransform(FName("GripPoint"));
+	//const FTransform SocketTransform2 = GetMesh1P()->GetSocketTransform(FName("Root"));
+
+	if (isAimingIn)
+	{
+		FirstPersonCameraComponent->Deactivate();
+		ADSCameraComponent->Activate();
+		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform);
+	}
+	else
+	{
+		ADSCameraComponent->Deactivate();
+		FirstPersonCameraComponent->Activate();
+
+		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform2);
+
+	}
+}
+
+
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
@@ -210,16 +231,3 @@ UTP_WeaponComponent* AScifiFPSCharacter::GetWeaponComponent() const
 	return WeaponComponent;
 }
 
-void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
-{
-	if(isAimingIn)
-	{
-		ADSCameraComponent->Activate();
-		FirstPersonCameraComponent->Deactivate();
-	}
-	else
-	{
-		FirstPersonCameraComponent->Activate();
-		ADSCameraComponent->Deactivate();
-	}
-}
