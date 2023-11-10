@@ -75,6 +75,8 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
 	}*/
 	FirstPersonCameraComponent->Activate();
+
+	WeaponComponent->SetPlayerCharacter(this);
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -97,24 +99,7 @@ void AScifiFPSCharacter::BeginPlay()
 		WeaponComponent->AttachWeapon(this);
 	}
 
-	if (CurveFloat)
-	{
-		CurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
-		CurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
-		this->BlueprintCreatedComponents.Add(CurveTimeline);
-
-		FOnTimelineFloat onTimelineCallback;
-		onTimelineCallback.BindUFunction(this, FName(TEXT("TimelineProgress")));
-		CurveTimeline->AddInterpFloat(CurveFloat, onTimelineCallback);
-		CurveTimeline->SetLooping(true);
-
-		StartLocation = EndLocation = GetActorLocation();
-		EndLocation.Z += ZOffset;
-
-		//CurveTimeline.PlayFromStart();
-		CurveTimeline->RegisterComponent();
-	}
-
+	
 	//if (PlayerHUDWidgetClass)
 	//{
 	//	PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
@@ -149,7 +134,6 @@ void AScifiFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//CurveTimeline.TickTimeline(DeltaTime);
-	CurveTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 	/*if (HealthComponent->GetHealth() <= 0)
 	{
 		if (GameOverWidgetClass)
@@ -211,7 +195,6 @@ void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
 		
 		// ADSTIMELINE UPDATE
 		
-		PlayTimeline();
 
 		/*FirstPersonCameraComponent->Deactivate();
 		ADSCameraComponent->Activate();*/
@@ -226,19 +209,7 @@ void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
 	}
 }
 
-void AScifiFPSCharacter::TimelineProgress(float Value)
-{
-	FVector NewLocation = FMath::Lerp(StartLocation, EndLocation, Value);
-	SetActorLocation(NewLocation);
-}
 
-void AScifiFPSCharacter::PlayTimeline()
-{
-	if(CurveTimeline)
-	{
-		CurveTimeline->PlayFromStart();
-	}
-}
 
 
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)

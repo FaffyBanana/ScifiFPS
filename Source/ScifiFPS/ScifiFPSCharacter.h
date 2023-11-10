@@ -10,7 +10,6 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Components/TimelineComponent.h"
 #include "ScifiFPSCharacter.generated.h"
 
 class UInputComponent;
@@ -19,7 +18,6 @@ class USceneComponent;
 class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
-class UCurveFloat;
 
 /*****************************************************************************************************
  * Type: Class
@@ -105,27 +103,6 @@ protected:
 
 	// End of APawn interface
 	virtual void Tick(float DeltaTime) override;
-
-	/* MOVE THESE VARIABLES ---------------------------------------------------------- */
-	UPROPERTY()
-	UTimelineComponent* CurveTimeline;
-
-	UPROPERTY(EditAnywhere, Category = Timeline)
-	UCurveFloat* CurveFloat;
-
-	UFUNCTION()
-	void TimelineProgress(float Value);
-
-	void PlayTimeline();
-
-	UPROPERTY()
-	FVector StartLocation;
-
-	UPROPERTY()
-	FVector EndLocation;
-
-	UPROPERTY(EditAnywhere, Category = Timeline)
-	float ZOffset;
 
 private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */

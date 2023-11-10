@@ -7,9 +7,11 @@
 #include "InventoryComponent.h"
 #include "Components/ChildActorComponent.h"
 #include "GunBase.h"
+#include "Components/TimelineComponent.h"
 #include "TP_WeaponComponent.generated.h"
 
 class AScifiFPSCharacter;
+class UCurveFloat;
 
 /*****************************************************************************************************
  * Type: Class
@@ -65,10 +67,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAimingIn() const;
 
+	void SetPlayerCharacter(AScifiFPSCharacter* player);
 
-	//// Called every frame
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	//	FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	UFUNCTION()
@@ -78,6 +78,9 @@ protected:
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
 	/* Aim down scope of gun */
@@ -86,6 +89,29 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	/* Aim out of scope to go back to hip fire */
 	void AimOutSight();
+
+	/* MOVE THESE VARIABLES ---------------------------------------------------------- */
+	UPROPERTY()
+	UTimelineComponent* CurveTimeline;
+
+	UPROPERTY(EditAnywhere, Category = Timeline)
+	UCurveFloat* CurveFloat;
+
+	UFUNCTION()
+	void TimelineProgress(float Value);
+
+	void PlayTimeline();
+
+	void ReverseTimeline();
+
+	UPROPERTY()
+	FVector StartLocation;
+
+	UPROPERTY()
+	FVector EndLocation;
+
+	UPROPERTY(EditAnywhere, Category = Timeline)
+	float ZOffset;
 
 private:
 	/* Fire single shot */

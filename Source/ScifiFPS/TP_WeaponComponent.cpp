@@ -10,14 +10,15 @@
 #include "EnemyAIManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/TimelineComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
-	/*PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bTickEvenWhenPaused = true;
-	PrimaryComponentTick.TickGroup = TG_PrePhysics;*/
+	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
@@ -89,15 +90,58 @@ void UTP_WeaponComponent::BeginPlay()
 	/* Set current weapon as active */
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
-	//m_weaponPlacementLocation = Character->GetMesh1P()->GetSocketTransform(FName(TEXT("GripPoint")), ERelativeTransformSpace::RTS_Actor).GetLocation();
+	m_weaponPlacementLocation = Character->GetMesh1P()->GetSocketTransform(FName(TEXT("GripPoint")), ERelativeTransformSpace::RTS_Actor).GetLocation();
+
+	if (CurveFloat)
+	{
+		CurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+		CurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
+		Character->BlueprintCreatedComponents.Add(CurveTimeline);
+
+		FOnTimelineFloat onTimelineCallback;
+		
+		onTimelineCallback.BindUFunction(this, FName(TEXT("TimelineProgress")));
+		CurveTimeline->AddInterpFloat(CurveFloat, onTimelineCallback);
+		CurveTimeline->SetLooping(false);
+
+		StartLocation = EndLocation = Character->GetActorLocation();
+		EndLocation.Z += ZOffset;
+		//CurveTimeline.PlayFromStart();
+		CurveTimeline->RegisterComponent();
+	}
 }
 
-//void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	
-//}
+void UTP_WeaponComponent::TimelineProgress(float Value)
+{
+	float socketADS =  m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_ParentBoneSpace).GetLocation().Y;
+	FVector lerp(10.0f, 0.0f, socketADS);
+
+	FVector lerpLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, lerp, Value);
+
+	m_gunArray[m_weaponIndex]->SetActorRelativeLocation(lerpLocation);
+}
+
+void UTP_WeaponComponent::PlayTimeline()
+{
+	if (CurveTimeline)
+	{
+		CurveTimeline->PlayFromStart();
+	}
+}
+
+void UTP_WeaponComponent::ReverseTimeline()
+{
+	if (CurveTimeline)
+	{
+		CurveTimeline->Reverse();
+	}
+}
+
+void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	//CurveTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
+}
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 {
@@ -250,6 +294,9 @@ void UTP_WeaponComponent::AimInSight()
 		m_bIsAimingIn = true;
 		Character->SwitchADS(m_bIsAimingIn);
 		
+		PlayTimeline();
+
+
 		float socketADS = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_ParentBoneSpace).GetLocation().Y;
 		FVector Lerp(10.0f, 0.0f, socketADS);
 		
@@ -261,8 +308,11 @@ void UTP_WeaponComponent::AimInSight()
 
 void UTP_WeaponComponent::AimOutSight()
 {
+
 	m_bIsAimingIn = false;
 	Character->SwitchADS(m_bIsAimingIn);
+
+	ReverseTimeline();
 }
 
 void UTP_WeaponComponent::ReloadWeapon()
@@ -334,7 +384,10 @@ bool UTP_WeaponComponent::GetIsAimingIn() const
 	return m_bIsAimingIn;
 }
 
-
+void UTP_WeaponComponent::SetPlayerCharacter(AScifiFPSCharacter* player)
+{
+	Character = player;
+}
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
