@@ -15,6 +15,10 @@
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
+	/*PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bTickEvenWhenPaused = true;
+	PrimaryComponentTick.TickGroup = TG_PrePhysics;*/
+
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 
@@ -50,6 +54,7 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 
 	/* Default reload time */
 	m_reloadTime = 2.25f;
+
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -83,7 +88,16 @@ void UTP_WeaponComponent::BeginPlay()
 
 	/* Set current weapon as active */
 	m_isWeaponActiveMap[m_currentWeapon] = true;
+
+	//m_weaponPlacementLocation = Character->GetMesh1P()->GetSocketTransform(FName(TEXT("GripPoint")), ERelativeTransformSpace::RTS_Actor).GetLocation();
 }
+
+//void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+//{
+//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+//
+//	
+//}
 
 void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
 {
@@ -235,15 +249,20 @@ void UTP_WeaponComponent::AimInSight()
 	{
 		m_bIsAimingIn = true;
 		Character->SwitchADS(m_bIsAimingIn);
+		
+		float socketADS = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_ParentBoneSpace).GetLocation().Y;
+		FVector Lerp(10.0f, 0.0f, socketADS);
+		
+
+		//UKismetMathLibrary::Lerp(m_weaponPlacementLocation, Lerp, timelineAlpha)
+		//m_gunArray[m_weaponIndex]->SetActorRelativeLocation()
 	}
 }
 
 void UTP_WeaponComponent::AimOutSight()
 {
-	
 	m_bIsAimingIn = false;
 	Character->SwitchADS(m_bIsAimingIn);
-
 }
 
 void UTP_WeaponComponent::ReloadWeapon()
@@ -259,7 +278,6 @@ void UTP_WeaponComponent::ReloadWeapon()
 	// Allow the player to shoot again
 	m_bCanShoot = true;
 }
-
 
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
@@ -315,6 +333,8 @@ bool UTP_WeaponComponent::GetIsAimingIn() const
 {
 	return m_bIsAimingIn;
 }
+
+
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
@@ -386,6 +406,7 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 }
+
 
 
 

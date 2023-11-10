@@ -9,6 +9,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/TimelineComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 
@@ -46,7 +47,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
 	// Create a weapon component 
-	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("Weapon"));
+	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("WeaponComponent"));
 
 	// Create health component
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
@@ -96,6 +97,24 @@ void AScifiFPSCharacter::BeginPlay()
 		WeaponComponent->AttachWeapon(this);
 	}
 
+	if (CurveFloat)
+	{
+		CurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+		CurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
+		this->BlueprintCreatedComponents.Add(CurveTimeline);
+
+		FOnTimelineFloat onTimelineCallback;
+		onTimelineCallback.BindUFunction(this, FName(TEXT("TimelineProgress")));
+		CurveTimeline->AddInterpFloat(CurveFloat, onTimelineCallback);
+		CurveTimeline->SetLooping(true);
+
+		StartLocation = EndLocation = GetActorLocation();
+		EndLocation.Z += ZOffset;
+
+		//CurveTimeline.PlayFromStart();
+		CurveTimeline->RegisterComponent();
+	}
+
 	//if (PlayerHUDWidgetClass)
 	//{
 	//	PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
@@ -129,7 +148,8 @@ void AScifiFPSCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 void AScifiFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	//CurveTimeline.TickTimeline(DeltaTime);
+	CurveTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 	/*if (HealthComponent->GetHealth() <= 0)
 	{
 		if (GameOverWidgetClass)
@@ -186,22 +206,37 @@ void AScifiFPSCharacter::StopSprint()
 
 void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
 {
-	//const FTransform SocketTransform = GetMesh1P()->GetSocketTransform(FName("GripPoint"));
-	//const FTransform SocketTransform2 = GetMesh1P()->GetSocketTransform(FName("Root"));
-
 	if (isAimingIn)
 	{
-		FirstPersonCameraComponent->Deactivate();
-		ADSCameraComponent->Activate();
+		
+		// ADSTIMELINE UPDATE
+		
+		PlayTimeline();
+
+		/*FirstPersonCameraComponent->Deactivate();
+		ADSCameraComponent->Activate();*/
 		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform);
 	}
 	else
 	{
-		ADSCameraComponent->Deactivate();
-		FirstPersonCameraComponent->Activate();
-
+		/*ADSCameraComponent->Deactivate();
+		FirstPersonCameraComponent->Activate();*/
 		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform2);
 
+	}
+}
+
+void AScifiFPSCharacter::TimelineProgress(float Value)
+{
+	FVector NewLocation = FMath::Lerp(StartLocation, EndLocation, Value);
+	SetActorLocation(NewLocation);
+}
+
+void AScifiFPSCharacter::PlayTimeline()
+{
+	if(CurveTimeline)
+	{
+		CurveTimeline->PlayFromStart();
 	}
 }
 

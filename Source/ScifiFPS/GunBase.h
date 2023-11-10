@@ -56,4 +56,6 @@ private:
 	/** Skeletal mesh of weapon */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* GunSkeletalMeshComponent;
+
+
 };

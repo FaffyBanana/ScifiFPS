@@ -9,8 +9,6 @@
 #include "GunBase.h"
 #include "TP_WeaponComponent.generated.h"
 
-
-
 class AScifiFPSCharacter;
 
 /*****************************************************************************************************
@@ -67,6 +65,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAimingIn() const;
 
+
+	//// Called every frame
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	//	FActorComponentTickFunction* ThisTickFunction) override;
+
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -74,6 +77,15 @@ protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+
+	UFUNCTION(BlueprintCallable)
+	/* Aim down scope of gun */
+	void AimInSight();
+
+	UFUNCTION(BlueprintCallable)
+	/* Aim out of scope to go back to hip fire */
+	void AimOutSight();
 
 private:
 	/* Fire single shot */
@@ -107,12 +119,6 @@ private:
 
 	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
-
-	/* Aim down scope of gun */
-	void AimInSight();
-
-	/* Aim out of scope to go back to hip fire */
-	void AimOutSight();
 
 public:
 	/* Seconds to wait between shots */
@@ -200,6 +206,8 @@ private:
 
 	/* Handle for reload timer */
 	FTimerHandle m_handleReload;
+
+	FVector m_weaponPlacementLocation;
 };
 
 	// /** Sound to play each time we fire */
