@@ -64,10 +64,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsReloading() const;
 
+	/* Get the boolean to see if player is aiming in */
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAimingIn() const;
 
+public:
+	/* Seconds to wait between shots */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		float TimeBetweenShots;
+
+	///** Gun muzzle's offset from the characters location */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//FVector MuzzleOffset;
+
 protected:
+	/** Begin play event */
 	UFUNCTION()
 	virtual void BeginPlay();
 
@@ -75,7 +86,7 @@ protected:
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// Called every frame
+	/** Event tick */
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 		FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -87,27 +98,22 @@ protected:
 	/* Aim out of scope to go back to hip fire */
 	void AimOutSight();
 
-	/* MOVE THESE VARIABLES ---------------------------------------------------------- */
 	UPROPERTY()
-	UTimelineComponent* ADSCurveTimeline;
+	UTimelineComponent* ADSCurveTimeline; // Timeline component for aiming down sights
 
 	UPROPERTY(EditAnywhere, Category = Timeline)
-	UCurveFloat* ADSCurveFloat;
+	UCurveFloat* ADSCurveFloat; // Curve float for aiming down sights
 
 	UFUNCTION()
-	void AimInTimelineProgress(float value);
-
-	void PlayADSTimeline();
-
-	void ReverseADSTimeline();
-
-	UPROPERTY()
-	FVector StartLocation;
-
-	UPROPERTY()
-	FVector EndLocation;
+	void AimInTimelineProgress(float value); // Called when the ADS timeline is played
 
 private:
+	/* Play the timeline for aiming down sights */
+	void PlayADSTimeline();
+
+	/* Reverse the timeline for aiming down sights */
+	void ReverseADSTimeline();
+
 	/* Fire single shot */
 	void Fire();
 
@@ -140,17 +146,8 @@ private:
 	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
 
-public:
-	/* Seconds to wait between shots */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float TimeBetweenShots;
-
-	///** Gun muzzle's offset from the characters location */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	//FVector MuzzleOffset;
-
 private:
-	/** Line trace distance (how far the player can shoot)*/
+	/** Line trace distance (how far the player can shoot) */
 	float ShootingDistance;
 
 	/** MappingContext */
@@ -181,10 +178,10 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AGunBase* SecondaryGun;
 
+	/* Location of primary gun ADS location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	FVector MeshADSLocation;
+	FVector MeshADSLocation; 
 	
-private:
 	// The Character holding this weapon 
 	AScifiFPSCharacter* Character;
 
@@ -230,9 +227,13 @@ private:
 	/* Handle for reload timer */
 	FTimerHandle m_handleReload;
 
+	/* Default placement of weapon */
 	FVector m_weaponPlacementLocation;
+
+	/* Default placement of mesh arms */
 	FVector m_meshPlacementLocation;
 
+	/* Aiming down sights defaults */
 	float m_aDSFOV;
 	float m_aDSDistanceToCamera;
 };

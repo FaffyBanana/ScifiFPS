@@ -81,66 +81,26 @@ void UTP_WeaponComponent::BeginPlay()
 	/* Set current weapon as active */
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
-	m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
-	m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
-
-	// ADS Curve
+	/* ADS Timeline */
 	if (ADSCurveFloat)
 	{
-		ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+		/* Create ADS curve timeline */
+		ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("ADSTimelineAnimation"));
 		ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
 		Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
 
+		/* Bind the ADS function to the timeline */
 		FOnTimelineFloat onTimelineCallback;
-		
 		onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
 		ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
 		ADSCurveTimeline->SetLooping(false);
-		 
-		StartLocation = Character->GetActorLocation();
-		EndLocation = StartLocation;
 		ADSCurveTimeline->RegisterComponent();
 
+		/* ADS variable defaults */
 		m_aDSFOV = 75.0f;
 		m_aDSDistanceToCamera = 10.0f;
-	}
-
-
-}
-
-void UTP_WeaponComponent::AimInTimelineProgress(float value)
-{
-	float socketADS =  m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_Actor).GetLocation().Y;
-	FVector lerp(m_aDSDistanceToCamera, 0.0f, socketADS);
-
-	FVector lerpLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, lerp, value);
-
-	//m_gunArray[m_weaponIndex]->SetActorRelativeLocation(lerpLocation);
-	Character->GetWeaponPlacementComponent()->SetRelativeLocation(lerpLocation);
-
-	FVector meshADSLocation(-16.000000, 1.450000, -165.700000); // For primary weapon
-
-	float tempADSFOV = UKismetMathLibrary::Lerp(90, m_aDSFOV, value);
-	Character->GetFirstPersonCameraComponent()->SetFieldOfView(tempADSFOV);
-
-	FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, MeshADSLocation, value);
-	Character->GetMesh1P()->SetRelativeLocation(meshLerp);
-
-}
-
-void UTP_WeaponComponent::PlayADSTimeline()
-{
-	if (ADSCurveTimeline)
-	{
-		ADSCurveTimeline->PlayFromStart();
-	}
-}
-
-void UTP_WeaponComponent::ReverseADSTimeline()
-{
-	if (ADSCurveTimeline)
-	{
-		ADSCurveTimeline->Reverse();
+		m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
+		m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
 	}
 }
 
@@ -152,12 +112,6 @@ void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UTP_WeaponComponent::AttachWeapon()
 {
-	/*Character = TargetCharacter;
-	if (Character == nullptr)
-	{
-		return;
-	}*/
-	
 	/* Setup weapon attachment */
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	PrimaryGun->GetGunSkeletalMeshComponent()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
@@ -311,6 +265,48 @@ void UTP_WeaponComponent::AimOutSight()
 	m_bIsAimingIn = false;
 
 	ReverseADSTimeline();
+}
+
+void UTP_WeaponComponent::AimInTimelineProgress(float value)
+{
+	// Get location of the aim socket on the gun
+	FVector aimSocketLocation = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()
+		->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_Actor).GetLocation();
+
+	// Lerp the distance to the camera and the socket location
+	FVector cameraADSlerp(m_aDSDistanceToCamera, 0.0f, aimSocketLocation.Y);
+
+	// Lerp the original weapon placement with the aim in location
+	FVector lerpADSLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, cameraADSlerp, value);
+
+	// Set the location of the weapon placement
+	Character->GetWeaponPlacementComponent()->SetRelativeLocation(lerpADSLocation);
+
+	//FVector meshADSLocation(-16.000000, 1.450000, -165.700000); // For primary weapon
+
+	// Lerp the FOV
+	float tempADSFOV = UKismetMathLibrary::Lerp(90, m_aDSFOV, value);
+	Character->GetFirstPersonCameraComponent()->SetFieldOfView(tempADSFOV);
+
+	// Lerp the mesh arms
+	FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, MeshADSLocation, value);
+	Character->GetMesh1P()->SetRelativeLocation(meshLerp);
+}
+
+void UTP_WeaponComponent::PlayADSTimeline()
+{
+	if (ADSCurveTimeline)
+	{
+		ADSCurveTimeline->PlayFromStart();
+	}
+}
+
+void UTP_WeaponComponent::ReverseADSTimeline()
+{
+	if (ADSCurveTimeline)
+	{
+		ADSCurveTimeline->Reverse();
+	}
 }
 
 void UTP_WeaponComponent::ReloadWeapon()
