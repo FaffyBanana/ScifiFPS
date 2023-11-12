@@ -11,28 +11,22 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/TimelineComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/SceneComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
+	:ShootingDistance (2000.0f) // Default line trace distance
+	,TimeBetweenShots (0.15f) // Time between each bullet
+	,m_weaponIndex (0) // Default equipped weapon index
+	,m_currentWeapon (EAmmunitionType::AE_Primary) // Default equipped weapon type
+	,m_bCanShoot (true)
+	,m_bIsFiring (false)
+	,m_bIsReloading (false)
+	,m_bIsAimingIn (false)
+	,m_reloadTime (2.25f)
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bTickEvenWhenPaused = true;
-	PrimaryComponentTick.TickGroup = TG_PrePhysics;
-
-	// Default offset from the character location for projectiles to spawn
-	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
-
-	// Default line trace distance
-	ShootingDistance = 2000.0f;
-
-	// Set time between shots
-	TimeBetweenShots = 0.15f;
-
-	/* Weapon defaults */
-	m_weaponIndex = 0;
-	m_currentWeapon = EAmmunitionType::AE_Primary;
-
 	/* Find the blueprint Primary Gun Class through reference */
 	static ConstructorHelpers::FClassFinder<AGunBase> PrimaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_AutomaticRifle"));
 	if (PrimaryWeaponFinder.Class)
@@ -46,16 +40,14 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	{
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
 	}
+	
+	/* Get owning character of the component */
+	Character = Cast<AScifiFPSCharacter>(GetOwner());
 
-	/* Set booleans */
-	m_bCanShoot = true;
-	m_bIsFiring = false;
-	m_bIsReloading = false;
-	m_bIsAimingIn = false;
-
-	/* Default reload time */
-	m_reloadTime = 2.25f;
-
+	//// Event tick defaults 
+	//PrimaryComponentTick.bCanEverTick = true;
+	//PrimaryComponentTick.bTickEvenWhenPaused = true;
+	//PrimaryComponentTick.TickGroup = TG_PrePhysics; 
 }
 
 void UTP_WeaponComponent::BeginPlay()
@@ -65,11 +57,10 @@ void UTP_WeaponComponent::BeginPlay()
 	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
 	/* Spawn all guns */
-	FVector location(0.0f, 0.0f, 0.0f);
-	FRotator rotation(0.0f, 0.0f, 0.0f);
+	FTransform transform = Character->GetWeaponPlacementComponent()->GetComponentTransform();
 	FActorSpawnParameters spawnInfo;
-	PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, location, rotation, spawnInfo);
-	SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, location, rotation, spawnInfo);
+	PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, transform, spawnInfo);
+	SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, transform, spawnInfo);
 
 	/* Set primary gun defaults */
 	if (PrimaryGun)
@@ -90,50 +81,66 @@ void UTP_WeaponComponent::BeginPlay()
 	/* Set current weapon as active */
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
-	m_weaponPlacementLocation = Character->GetMesh1P()->GetSocketTransform(FName(TEXT("GripPoint")), ERelativeTransformSpace::RTS_Actor).GetLocation();
+	m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
+	m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
 
-	if (CurveFloat)
+	// ADS Curve
+	if (ADSCurveFloat)
 	{
-		CurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
-		CurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
-		Character->BlueprintCreatedComponents.Add(CurveTimeline);
+		ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("TimelineAnimation"));
+		ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
+		Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
 
 		FOnTimelineFloat onTimelineCallback;
 		
-		onTimelineCallback.BindUFunction(this, FName(TEXT("TimelineProgress")));
-		CurveTimeline->AddInterpFloat(CurveFloat, onTimelineCallback);
-		CurveTimeline->SetLooping(false);
+		onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
+		ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
+		ADSCurveTimeline->SetLooping(false);
+		 
+		StartLocation = Character->GetActorLocation();
+		EndLocation = StartLocation;
+		ADSCurveTimeline->RegisterComponent();
 
-		StartLocation = EndLocation = Character->GetActorLocation();
-		EndLocation.Z += ZOffset;
-		//CurveTimeline.PlayFromStart();
-		CurveTimeline->RegisterComponent();
+		m_aDSFOV = 75.0f;
+		m_aDSDistanceToCamera = 10.0f;
+	}
+
+
+}
+
+void UTP_WeaponComponent::AimInTimelineProgress(float value)
+{
+	float socketADS =  m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_Actor).GetLocation().Y;
+	FVector lerp(m_aDSDistanceToCamera, 0.0f, socketADS);
+
+	FVector lerpLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, lerp, value);
+
+	//m_gunArray[m_weaponIndex]->SetActorRelativeLocation(lerpLocation);
+	Character->GetWeaponPlacementComponent()->SetRelativeLocation(lerpLocation);
+
+	FVector meshADSLocation(-16.000000, 1.450000, -165.700000); // For primary weapon
+
+	float tempADSFOV = UKismetMathLibrary::Lerp(90, m_aDSFOV, value);
+	Character->GetFirstPersonCameraComponent()->SetFieldOfView(tempADSFOV);
+
+	FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, MeshADSLocation, value);
+	Character->GetMesh1P()->SetRelativeLocation(meshLerp);
+
+}
+
+void UTP_WeaponComponent::PlayADSTimeline()
+{
+	if (ADSCurveTimeline)
+	{
+		ADSCurveTimeline->PlayFromStart();
 	}
 }
 
-void UTP_WeaponComponent::TimelineProgress(float Value)
+void UTP_WeaponComponent::ReverseADSTimeline()
 {
-	float socketADS =  m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_ParentBoneSpace).GetLocation().Y;
-	FVector lerp(10.0f, 0.0f, socketADS);
-
-	FVector lerpLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, lerp, Value);
-
-	m_gunArray[m_weaponIndex]->SetActorRelativeLocation(lerpLocation);
-}
-
-void UTP_WeaponComponent::PlayTimeline()
-{
-	if (CurveTimeline)
+	if (ADSCurveTimeline)
 	{
-		CurveTimeline->PlayFromStart();
-	}
-}
-
-void UTP_WeaponComponent::ReverseTimeline()
-{
-	if (CurveTimeline)
-	{
-		CurveTimeline->Reverse();
+		ADSCurveTimeline->Reverse();
 	}
 }
 
@@ -143,13 +150,13 @@ void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	//CurveTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 }
 
-void UTP_WeaponComponent::AttachWeapon(AScifiFPSCharacter* TargetCharacter)
+void UTP_WeaponComponent::AttachWeapon()
 {
-	Character = TargetCharacter;
+	/*Character = TargetCharacter;
 	if (Character == nullptr)
 	{
 		return;
-	}
+	}*/
 	
 	/* Setup weapon attachment */
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
@@ -257,8 +264,10 @@ void UTP_WeaponComponent::StartReloadWeaponTimer()
 		// Stop the player from shooting
 		m_bCanShoot = false;
 
+		// Start reloading
 		m_bIsReloading = true;
 
+		// Force aim out of weapon
 		AimOutSight();
 
 		// Start reload timer
@@ -292,27 +301,16 @@ void UTP_WeaponComponent::AimInSight()
 	if (!m_bIsReloading)
 	{
 		m_bIsAimingIn = true;
-		Character->SwitchADS(m_bIsAimingIn);
 		
-		PlayTimeline();
-
-
-		float socketADS = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_ParentBoneSpace).GetLocation().Y;
-		FVector Lerp(10.0f, 0.0f, socketADS);
-		
-
-		//UKismetMathLibrary::Lerp(m_weaponPlacementLocation, Lerp, timelineAlpha)
-		//m_gunArray[m_weaponIndex]->SetActorRelativeLocation()
+		PlayADSTimeline();
 	}
 }
 
 void UTP_WeaponComponent::AimOutSight()
 {
-
 	m_bIsAimingIn = false;
-	Character->SwitchADS(m_bIsAimingIn);
 
-	ReverseTimeline();
+	ReverseADSTimeline();
 }
 
 void UTP_WeaponComponent::ReloadWeapon()
@@ -331,8 +329,6 @@ void UTP_WeaponComponent::ReloadWeapon()
 
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 {
-	ClearReloadWeaponTimer();
-
 	/* Calculate correct weapon index to switch to */
 	float tempIndex = index.Get<float>();
 	int tempValue = UKismetMathLibrary::FTrunc(tempIndex);
@@ -356,37 +352,9 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 
 	StopFire();
 
+	ClearReloadWeaponTimer();
+
 	ShouldPlayerReload() ? StartReloadWeaponTimer() : m_bCanShoot = true;
-}
-
-int32 UTP_WeaponComponent::GetCurrentAmmo() const
-{
-	return InventoryComponent->GetAmmoCount(m_currentWeapon);
-}
-
-int32 UTP_WeaponComponent::GetTotalCurrentAmmo() const
-{
-	return InventoryComponent->GetTotalAmmoCount(m_currentWeapon);
-}
-
-bool UTP_WeaponComponent::GetIsFiring() const
-{
-	return m_bIsFiring;
-}
-
-bool UTP_WeaponComponent::GetIsReloading() const
-{
-	return m_bIsReloading;
-}
-
-bool UTP_WeaponComponent::GetIsAimingIn() const
-{
-	return m_bIsAimingIn;
-}
-
-void UTP_WeaponComponent::SetPlayerCharacter(AScifiFPSCharacter* player)
-{
-	Character = player;
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
@@ -426,6 +394,30 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
 }
+int32 UTP_WeaponComponent::GetCurrentAmmo() const
+{
+	return InventoryComponent->GetAmmoCount(m_currentWeapon);
+}
+
+int32 UTP_WeaponComponent::GetTotalCurrentAmmo() const
+{
+	return InventoryComponent->GetTotalAmmoCount(m_currentWeapon);
+}
+
+bool UTP_WeaponComponent::GetIsFiring() const
+{
+	return m_bIsFiring;
+}
+
+bool UTP_WeaponComponent::GetIsReloading() const
+{
+	return m_bIsReloading;
+}
+
+bool UTP_WeaponComponent::GetIsAimingIn() const
+{
+	return m_bIsAimingIn;
+}
 
 void UTP_WeaponComponent::StartFire()
 {
@@ -460,9 +452,6 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-
-
-
 // Code from default template that I don't need but don't want to delete yet
 	// Try and fire a projectile
 	//if (ProjectileClass != nullptr)
@@ -489,5 +478,8 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//{
 		//UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
 	//}
+	//
+	// MESH ARMS IDLE LOCATION
+	//(X=-1.949723,Y=0.000000,Z=-163.721813)
 
 	

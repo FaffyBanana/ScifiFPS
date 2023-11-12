@@ -42,7 +42,7 @@ public:
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void AttachWeapon(AScifiFPSCharacter* TargetCharacter);
+	void AttachWeapon();
 
 	/* Calculate the correct weapon index */
 	UFUNCTION()
@@ -67,9 +67,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAimingIn() const;
 
-	void SetPlayerCharacter(AScifiFPSCharacter* player);
-
-
 protected:
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -92,26 +89,23 @@ protected:
 
 	/* MOVE THESE VARIABLES ---------------------------------------------------------- */
 	UPROPERTY()
-	UTimelineComponent* CurveTimeline;
+	UTimelineComponent* ADSCurveTimeline;
 
 	UPROPERTY(EditAnywhere, Category = Timeline)
-	UCurveFloat* CurveFloat;
+	UCurveFloat* ADSCurveFloat;
 
 	UFUNCTION()
-	void TimelineProgress(float Value);
+	void AimInTimelineProgress(float value);
 
-	void PlayTimeline();
+	void PlayADSTimeline();
 
-	void ReverseTimeline();
+	void ReverseADSTimeline();
 
 	UPROPERTY()
 	FVector StartLocation;
 
 	UPROPERTY()
 	FVector EndLocation;
-
-	UPROPERTY(EditAnywhere, Category = Timeline)
-	float ZOffset;
 
 private:
 	/* Fire single shot */
@@ -151,9 +145,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TimeBetweenShots;
 
-	/** Gun muzzle's offset from the characters location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FVector MuzzleOffset;
+	///** Gun muzzle's offset from the characters location */
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	//FVector MuzzleOffset;
 
 private:
 	/** Line trace distance (how far the player can shoot)*/
@@ -186,6 +180,9 @@ private:
 	/* Secondary gun */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AGunBase* SecondaryGun;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	FVector MeshADSLocation;
 	
 private:
 	// The Character holding this weapon 
@@ -234,6 +231,10 @@ private:
 	FTimerHandle m_handleReload;
 
 	FVector m_weaponPlacementLocation;
+	FVector m_meshPlacementLocation;
+
+	float m_aDSFOV;
+	float m_aDSDistanceToCamera;
 };
 
 	// /** Sound to play each time we fire */

@@ -72,9 +72,10 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	USceneComponent* GetWeaponPlacementComponent() const { return WeaponPlacementComponent;  }
+
 	/* Switch to ADS camera */
 	void SwitchADS(bool isAimingIn);
-
 
 public:
 	/** Look Input Action */
@@ -113,9 +114,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
-	/** ADS camera */
+	/* Scene component for where the weapon is placed */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* ADSCameraComponent;
+	USceneComponent* WeaponPlacementComponent;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))

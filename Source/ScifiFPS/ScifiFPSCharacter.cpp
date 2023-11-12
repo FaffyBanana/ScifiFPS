@@ -17,66 +17,64 @@
 // AScifiFPSCharacter
 
 AScifiFPSCharacter::AScifiFPSCharacter()
+	:m_defaultWalkSpeed (500.0f)
+	,m_defaultSprintSpeed (1000.0f)
+	,bHasRifle(true)
 {
+	// Player can tick 
 	PrimaryActorTick.bCanEverTick = true;
-
-	// Character doesnt have a rifle at start
-	bHasRifle = false;
 	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
-	// Create a CameraComponent	
+	/* Create a CameraComponent */
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
-	ADSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
-	ADSCameraComponent->SetupAttachment(GetCapsuleComponent());
-	ADSCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
-	ADSCameraComponent->bUsePawnControlRotation = true;
-
-	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
+	/* Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn) */
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	Mesh1P->SetOnlyOwnerSee(true);
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
-	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	// Create a weapon component 
+	/* Create a weapon placement component that weapons will attach to */
+	WeaponPlacementComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponPlacement"));
+	WeaponPlacementComponent->SetupAttachment(FirstPersonCameraComponent);
+	WeaponPlacementComponent->SetRelativeLocation(FVector(20.0f, 20.0f, -20.0f));
+
+	/* Create a weapon component */
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("WeaponComponent"));
 
-	// Create health component
+	/* Create health component */
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
-	// Create inventory component
+	/* Create inventory component */
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
-	// Find BP widget 
+	/* Find BP widget */
 	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/FirstPerson/UI/WBP_Gameover"));
 	if (GameOverWidgetClassFinder.Class)
 	{
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
 	}
 
-	/* Character movement defaults */
-	m_defaultWalkSpeed = 500.0f;
-	m_defaultSprintSpeed = 1000.0f;
-
 	// Set default walk speed
 	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
+
+	//if(WeaponComponent)
+	//{
+	//	WeaponComponent->SetPlayerCharacter(this);
+	//}
 
 	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
 	{
 		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
 	}*/
-	FirstPersonCameraComponent->Activate();
-
-	WeaponComponent->SetPlayerCharacter(this);
 }
 
 void AScifiFPSCharacter::BeginPlay()
@@ -96,7 +94,7 @@ void AScifiFPSCharacter::BeginPlay()
 	// Attach weapon to player
 	if (WeaponComponent)
 	{
-		WeaponComponent->AttachWeapon(this);
+		WeaponComponent->AttachWeapon();
 	}
 
 	
@@ -150,7 +148,6 @@ void AScifiFPSCharacter::Respawn()
 	
 	GetWorld()->GetAuthGameMode()->RestartPlayer(GetWorld()->GetFirstPlayerController());
 }
-
 
 void AScifiFPSCharacter::Move(const FInputActionValue& Value)
 {
