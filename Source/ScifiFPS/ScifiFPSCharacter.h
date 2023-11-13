@@ -49,13 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void SetHasRifle(const bool bNewHasRifle);
 
-	/** Getter for the bool */
+	/** Return m_bhasrifle */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle() const;
-
-	/* Respawn and reset the player */
-	UFUNCTION(BlueprintCallable)
-	void Respawn();
 
 	/* Return Health Component */
 	UHealthComponent* GetHealthComponent() const;
@@ -66,23 +62,16 @@ public:
 	/* Return Weapon Component */
 	UTP_WeaponComponent* GetWeaponComponent() const;
 
-	/** Returns Mesh1P subobject **/
+	/** Return Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 
-	/** Returns FirstPersonCameraComponent subobject **/
+	/** Return FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	/** Return WeaponPlacementComponent subobject **/
 	USceneComponent* GetWeaponPlacementComponent() const { return WeaponPlacementComponent;  }
 
-	/* Switch to ADS camera */
-	void SwitchADS(bool isAimingIn);
-
-public:
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
-
-protected:
+private:
 	/* Begin Play event */
 	virtual void BeginPlay();
 
@@ -98,12 +87,14 @@ protected:
 	/** Called for sprint input */
 	void StopSprint();
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 	// End of APawn interface
 	virtual void Tick(float DeltaTime) override;
+
+	/* Respawn and reset the player */
+	void Respawn();
 
 private:
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
@@ -130,6 +121,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction;
 
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
+
 	/** Sprint Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SprintAction;
@@ -148,7 +143,7 @@ private:
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	bool bHasRifle;
+	bool m_bHasRifle;
 
 	/* Default Walk Speed */
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
@@ -158,7 +153,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	float m_defaultSprintSpeed;
 
-private:
 	/* Game Over Menu */
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 	UUserWidget* GameOverWidget;

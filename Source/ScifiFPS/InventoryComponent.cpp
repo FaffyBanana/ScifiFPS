@@ -28,17 +28,12 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 // Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)

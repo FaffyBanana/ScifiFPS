@@ -17,15 +17,17 @@
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
-	:ShootingDistance (2000.0f) // Default line trace distance
-	,TimeBetweenShots (0.15f) // Time between each bullet
-	,m_weaponIndex (0) // Default equipped weapon index
-	,m_currentWeapon (EAmmunitionType::AE_Primary) // Default equipped weapon type
+	:ShootingDistance (2000.0f) 
+	,TimeBetweenShots (0.15f)
+	,m_weaponIndex (0)
+	,m_currentWeapon (EAmmunitionType::AE_Primary)
 	,m_bCanShoot (true)
 	,m_bIsFiring (false)
 	,m_bIsReloading (false)
 	,m_bIsAimingIn (false)
 	,m_reloadTime (2.25f)
+	,m_aDSFOV (75.0f)
+	,m_aDSDistanceToCamera (10.0f)
 {
 	/* Find the blueprint Primary Gun Class through reference */
 	static ConstructorHelpers::FClassFinder<AGunBase> PrimaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_AutomaticRifle"));
@@ -41,73 +43,67 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
 	}
 	
-	/* Get owning character of the component */
+	/* Get a reference to the player who owns this component */
 	Character = Cast<AScifiFPSCharacter>(GetOwner());
-
-	//// Event tick defaults 
-	//PrimaryComponentTick.bCanEverTick = true;
-	//PrimaryComponentTick.bTickEvenWhenPaused = true;
-	//PrimaryComponentTick.TickGroup = TG_PrePhysics; 
 }
 
 void UTP_WeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryComponent = GetOwner()->FindComponentByClass<UInventoryComponent>();
-
-	/* Spawn all guns */
-	FTransform transform = Character->GetWeaponPlacementComponent()->GetComponentTransform();
-	FActorSpawnParameters spawnInfo;
-	PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, transform, spawnInfo);
-	SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, transform, spawnInfo);
-
-	/* Set primary gun defaults */
-	if (PrimaryGun)
+	if (Character)
 	{
-		m_gunArray.Add(PrimaryGun);
-		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
-		m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
+		/* Spawn all guns */
+		FTransform transform = Character->GetWeaponPlacementComponent()->GetComponentTransform();
+		FActorSpawnParameters spawnInfo;
+		PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, transform, spawnInfo);
+		SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, transform, spawnInfo);
+
+		/* Set primary gun defaults */
+		if (PrimaryGun)
+		{
+			m_gunArray.Add(PrimaryGun);
+			m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
+			m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
+		}
+
+		/* Set secondary gun defaults */
+		if (SecondaryGun)
+		{
+			m_gunArray.Add(SecondaryGun);
+			m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
+			m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
+		}
+
+		/* Set current weapon as active */
+		m_isWeaponActiveMap[m_currentWeapon] = true;
+
+		/* ADS Timeline */
+		if (ADSCurveFloat)
+		{
+			/* Create ADS curve timeline */
+			ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("ADSTimelineAnimation"));
+			ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
+			Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
+
+			/* Bind the ADS function to the timeline */
+			FOnTimelineFloat onTimelineCallback;
+			onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
+			ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
+			ADSCurveTimeline->SetLooping(false);
+			ADSCurveTimeline->RegisterComponent();
+
+			/* ADS variable defaults */
+		
+			m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
+			m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
+			m_fOV = Character->GetFirstPersonCameraComponent()->FieldOfView;
+		}
+
+
+		InventoryComponent = Character->FindComponentByClass<UInventoryComponent>();
+		AttachWeapon();
 	}
-
-	/* Set secondary gun defaults */
-	if (SecondaryGun)
-	{
-		m_gunArray.Add(SecondaryGun);
-		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
-		m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
-	}
-
-	/* Set current weapon as active */
-	m_isWeaponActiveMap[m_currentWeapon] = true;
-
-	/* ADS Timeline */
-	if (ADSCurveFloat)
-	{
-		/* Create ADS curve timeline */
-		ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("ADSTimelineAnimation"));
-		ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
-		Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
-
-		/* Bind the ADS function to the timeline */
-		FOnTimelineFloat onTimelineCallback;
-		onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
-		ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
-		ADSCurveTimeline->SetLooping(false);
-		ADSCurveTimeline->RegisterComponent();
-
-		/* ADS variable defaults */
-		m_aDSFOV = 75.0f;
-		m_aDSDistanceToCamera = 10.0f;
-		m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
-		m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
-	}
-}
-
-void UTP_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//CurveTimeline->TickComponent(DeltaTime, ELevelTick::LEVELTICK_TimeOnly, NULL);
 }
 
 void UTP_WeaponComponent::AttachWeapon()
@@ -136,12 +132,10 @@ void UTP_WeaponComponent::AttachWeapon()
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::StopFire);
 			EnhancedInputComponent->BindAction(SwitchWeaponsAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::SwitchWeapons);
 			EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::StartReloadWeaponTimer);
-
 			EnhancedInputComponent->BindAction(AimDownSightAction, ETriggerEvent::Started, this, &UTP_WeaponComponent::AimInSight);
 			EnhancedInputComponent->BindAction(AimDownSightAction, ETriggerEvent::Completed, this, &UTP_WeaponComponent::AimOutSight);
 		}
 	}
-
 	SwitchToNextWeapon();
 }
 
@@ -168,6 +162,7 @@ void UTP_WeaponComponent::RaycastShot()
 	// If line trace has hit an object
 	if (bHit)
 	{
+		/* If AI has been hit */
 		AEnemyAIManager* enemyManager = Cast<AEnemyAIManager>(hit.GetActor());
 		if (enemyManager)
 		{
@@ -187,7 +182,7 @@ void UTP_WeaponComponent::Fire()
 	if (InventoryComponent)
 	{
 		// If the player has ammunition and can shoot
-		if (GetCurrentAmmo() != 0 && m_bCanShoot)
+		if (GetCurrentAmmoOfCurrentWeapon() != 0 && m_bCanShoot)
 		{
 			m_bIsFiring = true;
 
@@ -202,11 +197,9 @@ void UTP_WeaponComponent::Fire()
 		}
 
 		// If the player has no ammunition 
-		if (GetCurrentAmmo() == 0 && m_bCanShoot)
+		if (GetCurrentAmmoOfCurrentWeapon() == 0 && m_bCanShoot)
 		{
-			// If there is no reserve ammo stop shooting
-				// Else start reloading
-			GetTotalCurrentAmmo() == 0 ? StopFire() : StartReloadWeaponTimer();
+			GetTotalAmmoOfCurrentWeapon() == 0 ? StopFire() : StartReloadWeaponTimer();
 		}
 	}
 }
@@ -237,9 +230,10 @@ void UTP_WeaponComponent::ClearReloadWeaponTimer()
 
 bool UTP_WeaponComponent::ShouldPlayerReload() const
 {
-	if (InventoryComponent->GetTotalAmmoCount(m_currentWeapon) != 0)
-		// Has the player run out of ammunition 
-		return InventoryComponent->GetAmmoCount(m_currentWeapon) < InventoryComponent->GetMaxAmmoInCatridgeCount(m_currentWeapon) ? true : false;
+	// If the player hasn't run out of ammo compeletely
+	// And doesn't have a full magazine
+	if (GetTotalAmmoOfCurrentWeapon() != 0)
+		return GetCurrentAmmoOfCurrentWeapon() < GetMaximumAmmunitionOfCurrentWeapon() ? true : false;
 
 	return false;
 }
@@ -273,22 +267,20 @@ void UTP_WeaponComponent::AimInTimelineProgress(float value)
 	FVector aimSocketLocation = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()
 		->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_Actor).GetLocation();
 
-	// Lerp the distance to the camera and the socket location
+	// Create a vector for the camera ADS
 	FVector cameraADSlerp(m_aDSDistanceToCamera, 0.0f, aimSocketLocation.Y);
 
-	// Lerp the original weapon placement with the aim in location
+	// Lerp the original weapon placement with the aim in location using the timeline's alpha value
 	FVector lerpADSLocation = UKismetMathLibrary::VLerp(m_weaponPlacementLocation, cameraADSlerp, value);
-
-	// Set the location of the weapon placement
 	Character->GetWeaponPlacementComponent()->SetRelativeLocation(lerpADSLocation);
 
 	//FVector meshADSLocation(-16.000000, 1.450000, -165.700000); // For primary weapon
 
-	// Lerp the FOV
+	// Lerp the ADS FOV and the Non ADS FOV using the timeline's alpha value 
 	float tempADSFOV = UKismetMathLibrary::Lerp(90, m_aDSFOV, value);
 	Character->GetFirstPersonCameraComponent()->SetFieldOfView(tempADSFOV);
 
-	// Lerp the mesh arms
+	// Move the mesh arms into its ADS location and back
 	FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, MeshADSLocation, value);
 	Character->GetMesh1P()->SetRelativeLocation(meshLerp);
 }
@@ -390,14 +382,19 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
 }
-int32 UTP_WeaponComponent::GetCurrentAmmo() const
+int32 UTP_WeaponComponent::GetCurrentAmmoOfCurrentWeapon() const
 {
 	return InventoryComponent->GetAmmoCount(m_currentWeapon);
 }
 
-int32 UTP_WeaponComponent::GetTotalCurrentAmmo() const
+int32 UTP_WeaponComponent::GetTotalAmmoOfCurrentWeapon() const
 {
 	return InventoryComponent->GetTotalAmmoCount(m_currentWeapon);
+}
+
+int32 UTP_WeaponComponent::GetMaximumAmmunitionOfCurrentWeapon() const
+{
+	return InventoryComponent->GetMaxAmmoInCatridgeCount(m_currentWeapon);
 }
 
 bool UTP_WeaponComponent::GetIsFiring() const

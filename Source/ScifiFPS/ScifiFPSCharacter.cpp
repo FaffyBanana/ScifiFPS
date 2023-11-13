@@ -19,7 +19,6 @@
 AScifiFPSCharacter::AScifiFPSCharacter()
 	:m_defaultWalkSpeed (500.0f)
 	,m_defaultSprintSpeed (1000.0f)
-	,bHasRifle(true)
 {
 	// Player can tick 
 	PrimaryActorTick.bCanEverTick = true;
@@ -46,16 +45,12 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	WeaponPlacementComponent->SetupAttachment(FirstPersonCameraComponent);
 	WeaponPlacementComponent->SetRelativeLocation(FVector(20.0f, 20.0f, -20.0f));
 
-	/* Create a weapon component */
+	/* Components */
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("WeaponComponent"));
-
-	/* Create health component */
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-
-	/* Create inventory component */
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
-	/* Find BP widget */
+	/* Find the gameover menu widget */
 	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/FirstPerson/UI/WBP_Gameover"));
 	if (GameOverWidgetClassFinder.Class)
 	{
@@ -64,11 +59,6 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 
 	// Set default walk speed
 	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
-
-	//if(WeaponComponent)
-	//{
-	//	WeaponComponent->SetPlayerCharacter(this);
-	//}
 
 	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
@@ -90,14 +80,6 @@ void AScifiFPSCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
-	// Attach weapon to player
-	if (WeaponComponent)
-	{
-		WeaponComponent->AttachWeapon();
-	}
-
-	
 	//if (PlayerHUDWidgetClass)
 	//{
 	//	PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
@@ -131,7 +113,6 @@ void AScifiFPSCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 void AScifiFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//CurveTimeline.TickTimeline(DeltaTime);
 	/*if (HealthComponent->GetHealth() <= 0)
 	{
 		if (GameOverWidgetClass)
@@ -151,12 +132,12 @@ void AScifiFPSCharacter::Respawn()
 
 void AScifiFPSCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
+	// Input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add movement 
+		// Add movement 
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
@@ -164,12 +145,12 @@ void AScifiFPSCharacter::Move(const FInputActionValue& Value)
 
 void AScifiFPSCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
+	// Input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// add yaw and pitch input to controller
+		// Add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
@@ -185,38 +166,14 @@ void AScifiFPSCharacter::StopSprint()
 	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
 }
 
-void AScifiFPSCharacter::SwitchADS(bool isAimingIn)
-{
-	if (isAimingIn)
-	{
-		
-		// ADSTIMELINE UPDATE
-		
-
-		/*FirstPersonCameraComponent->Deactivate();
-		ADSCameraComponent->Activate();*/
-		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform);
-	}
-	else
-	{
-		/*ADSCameraComponent->Deactivate();
-		FirstPersonCameraComponent->Activate();*/
-		//FirstPersonCameraComponent->SetWorldTransform(SocketTransform2);
-
-	}
-}
-
-
-
-
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)
 {
-	bHasRifle = bNewHasRifle;
+	m_bHasRifle = bNewHasRifle;
 }
 
 bool AScifiFPSCharacter::GetHasRifle() const
 {
-	return bHasRifle;
+	return m_bHasRifle;
 }
 
 UHealthComponent* AScifiFPSCharacter::GetHealthComponent() const

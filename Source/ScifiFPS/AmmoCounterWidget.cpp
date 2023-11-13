@@ -17,10 +17,10 @@ void UAmmoCounterWidget::NativeConstruct()
 
 FText UAmmoCounterWidget::GetAmmoText() const
 {
-	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetCurrentAmmo());
+	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetCurrentAmmoOfCurrentWeapon());
 }
 
 FText UAmmoCounterWidget::GetTotalAmmoText() const
 {
-	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetTotalCurrentAmmo());
+	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetTotalAmmoOfCurrentWeapon());
 }

@@ -70,15 +70,15 @@ public:
 /*****************************************************************************************************
  * Type: Class
  *
- * Name:
+ * Name: UInventoryComponent
  *
  * Author: Jaber Ahmed
  *
- * Purpose:
+ * Purpose: Handle all inventory data 
  *
  * References: N/A
  *
- * See Also: N/A
+ * See Also: TP_WeaponComponent (ammunition), ScifiFPSCharacter
  *
  * Change Log:
  * Date          Initials    Version     Comments

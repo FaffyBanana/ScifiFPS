@@ -28,7 +28,10 @@ class UCurveFloat;
  *
  * Change Log:
  * Date          Initials    Version     Comments
- * 02/08/2023    JA          v1.0        N/A
+ * 02/08/2023    JA          v1.0        Weapon Firing
+ * 27/09/2023	 JA			 v1.1		 Weapon Switching
+ * 06/11/2023	 JA			 v1.2		 Reload weapon
+ * 13/11/2023	 JA			 v1.3		 Implemented ADS
 *****************************************************************************************************/
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -40,21 +43,13 @@ public:
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
-	/** Attaches the actor to a FirstPersonCharacter */
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void AttachWeapon();
-
-	/* Calculate the correct weapon index */
-	UFUNCTION()
-	void SwitchWeapons(const FInputActionValue& index);
-
 	/* Get the current ammunition count of the current weapon */
 	UFUNCTION(BlueprintCallable)
-	int32 GetCurrentAmmo() const;
+	int32 GetCurrentAmmoOfCurrentWeapon() const;
 
 	/* Get the total ammunition count of the current weapon */
 	UFUNCTION(BlueprintCallable)
-	int32 GetTotalCurrentAmmo() const;
+	int32 GetTotalAmmoOfCurrentWeapon() const;
 
 	/* Get boolean to see if player is firing */
 	UFUNCTION(BlueprintCallable)
@@ -68,16 +63,32 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAimingIn() const;
 
-public:
+protected:
 	/* Seconds to wait between shots */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-		float TimeBetweenShots;
+	float TimeBetweenShots;
 
-	///** Gun muzzle's offset from the characters location */
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	//FVector MuzzleOffset;
+	/** Line trace distance (how far the player can shoot) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float ShootingDistance;
 
-protected:
+	UPROPERTY(EditAnywhere, Category = Timeline)
+	UCurveFloat* ADSCurveFloat; // Curve float for aiming down sights
+
+private:
+	
+
+	/* Get the maximum ammount the current weapon can reload up to */
+	int32 GetMaximumAmmunitionOfCurrentWeapon() const;
+
+	/** Attaches the actor to a FirstPersonCharacter */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+	void AttachWeapon();
+
+	/* Calculate the correct weapon index */
+	UFUNCTION()
+	void SwitchWeapons(const FInputActionValue& index);
+
 	/** Begin play event */
 	UFUNCTION()
 	virtual void BeginPlay();
@@ -86,28 +97,17 @@ protected:
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	/** Event tick */
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-		FActorComponentTickFunction* ThisTickFunction) override;
-
-	UFUNCTION(BlueprintCallable)
 	/* Aim down scope of gun */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void AimInSight();
 
-	UFUNCTION(BlueprintCallable)
 	/* Aim out of scope to go back to hip fire */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
 	void AimOutSight();
-
-	UPROPERTY()
-	UTimelineComponent* ADSCurveTimeline; // Timeline component for aiming down sights
-
-	UPROPERTY(EditAnywhere, Category = Timeline)
-	UCurveFloat* ADSCurveFloat; // Curve float for aiming down sights
 
 	UFUNCTION()
 	void AimInTimelineProgress(float value); // Called when the ADS timeline is played
 
-private:
 	/* Play the timeline for aiming down sights */
 	void PlayADSTimeline();
 
@@ -146,10 +146,9 @@ private:
 	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
 
-private:
-	/** Line trace distance (how far the player can shoot) */
-	float ShootingDistance;
+	//void SpawnGun(const AGunBase* gun, const TSubclassOf<AGunBase> gunRef);
 
+private:
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* FireMappingContext;
@@ -177,6 +176,9 @@ private:
 	/* Secondary gun */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	AGunBase* SecondaryGun;
+
+	UPROPERTY()
+	UTimelineComponent* ADSCurveTimeline; // Timeline component for aiming down sights
 
 	/* Location of primary gun ADS location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -236,6 +238,8 @@ private:
 	/* Aiming down sights defaults */
 	float m_aDSFOV;
 	float m_aDSDistanceToCamera;
+
+	float m_fOV;
 };
 
 	// /** Sound to play each time we fire */
