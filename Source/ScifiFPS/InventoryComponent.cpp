@@ -15,12 +15,12 @@ UInventoryComponent::UInventoryComponent()
 	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultMaxSecondaryAmmunition);
 
 	// Set ammunition count of each weapon
-	m_ammunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Primary]);
-	m_ammunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Secondary]);
+	m_currentAmmunitionCount.Add(EAmmunitionType::AE_Primary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Primary]);
+	m_currentAmmunitionCount.Add(EAmmunitionType::AE_Secondary, m_maxAmmunitionInCatridge[EAmmunitionType::AE_Secondary]);
 
 	// Set ammunition count of each weapon
-	m_totalAmmunitionCount.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultTotalPrimaryAmmunition);
-	m_totalAmmunitionCount.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultTotalSecondaryAmmunition);
+	m_reserveAmmunitionCount.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultTotalPrimaryAmmunition);
+	m_reserveAmmunitionCount.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultTotalSecondaryAmmunition);
 }
 
 
@@ -39,49 +39,49 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 {
 	/* If there is enough reserve ammunition to refill a full magazine */
-	if (m_totalAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
+	if (m_reserveAmmunitionCount[ammo] >= m_maxAmmunitionInCatridge[ammo])
 	{
-		m_totalAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]);
-		m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
+		m_reserveAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_currentAmmunitionCount[ammo]);
+		m_currentAmmunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
 	}
 
 	/* If there isn't enough reserve ammunition to refill a full magazine */
-	else if (m_totalAmmunitionCount[ammo] < m_maxAmmunitionInCatridge[ammo] && m_totalAmmunitionCount[ammo] > 0)
+	else if (m_reserveAmmunitionCount[ammo] < m_maxAmmunitionInCatridge[ammo] && m_reserveAmmunitionCount[ammo] > 0)
 	{
 		/* If there isn't enough reserve for a full clip */
-		if (m_totalAmmunitionCount[ammo] < (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]))
+		if (m_reserveAmmunitionCount[ammo] < (m_maxAmmunitionInCatridge[ammo] - m_currentAmmunitionCount[ammo]))
 		{
-			m_ammunitionCount[ammo] += m_totalAmmunitionCount[ammo];
-			m_totalAmmunitionCount[ammo] = 0;
+			m_currentAmmunitionCount[ammo] += m_reserveAmmunitionCount[ammo];
+			m_reserveAmmunitionCount[ammo] = 0;
 		}
 		/* If there is enough reserve for a full clip */
 		else
 		{
-			m_totalAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_ammunitionCount[ammo]);
-			m_ammunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
+			m_reserveAmmunitionCount[ammo] -= (m_maxAmmunitionInCatridge[ammo] - m_currentAmmunitionCount[ammo]);
+			m_currentAmmunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
 		}
 	}
 
-	/* If the total ammunition goes below zero */
+	/* If the reserve ammunition goes below zero */
 	else
 	{
-		m_totalAmmunitionCount[ammo] = 0;
+		m_reserveAmmunitionCount[ammo] = 0;
 	}
 }
 
 void UInventoryComponent::ConsumeAmmo(EAmmunitionType ammo)
 {
-	m_ammunitionCount[ammo]--;
+	m_currentAmmunitionCount[ammo]--;
 }
 
-int32 UInventoryComponent::GetAmmoCount(EAmmunitionType ammo) const
+int32 UInventoryComponent::GetCurrentAmmoCount(EAmmunitionType ammo) const
 {
-	 return m_ammunitionCount[ammo];
+	 return m_currentAmmunitionCount[ammo];
 }
 
-int32 UInventoryComponent::GetTotalAmmoCount(EAmmunitionType ammo) const
+int32 UInventoryComponent::GetReserveAmmoCount(EAmmunitionType ammo) const
 {
-	return m_totalAmmunitionCount[ammo];
+	return m_reserveAmmunitionCount[ammo];
 }
 
 int32 UInventoryComponent::GetMaxAmmoInCatridgeCount(EAmmunitionType ammo) const

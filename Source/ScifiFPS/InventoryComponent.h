@@ -104,11 +104,11 @@ public:
 	/* Consume ammunition by decrementing count */
 	void ConsumeAmmo(EAmmunitionType ammo);
 
-	/* Return the ammunition count */
-	int32 GetAmmoCount(EAmmunitionType ammo) const;
+	/* Return the current ammunition count */
+	int32 GetCurrentAmmoCount(EAmmunitionType ammo) const;
 
 	/* Return the total ammunition count */
-	int32 GetTotalAmmoCount(EAmmunitionType ammo) const;
+	int32 GetReserveAmmoCount(EAmmunitionType ammo) const;
 
 	/* Get the maximum ammunition count of the weapon */
 	int32 GetMaxAmmoInCatridgeCount(EAmmunitionType ammo) const;
@@ -118,13 +118,15 @@ public:
 
 private:
 	// Hash map for ammunition count of each weapon
-	TMap<EAmmunitionType, int8> m_ammunitionCount;
+	TMap<EAmmunitionType, int8> m_currentAmmunitionCount;
 
 	// Hash map for the max amount of ammunition (before gun has to reload the catridge) of each weapon
+	// This is the maximum ammount of bullets that the player can shoot before they have to reload
 	TMap<EAmmunitionType, int8> m_maxAmmunitionInCatridge;
 
 	// Hash map for the reserve ammunition
-	TMap<EAmmunitionType, int8> m_totalAmmunitionCount;
+	// This is the total amount of ammunition the player has 
+	TMap<EAmmunitionType, int8> m_reserveAmmunitionCount;
 
 	// Reference to struct that holds the ammunitions default variables 
 	FAmmunition m_ammunitionSettings;

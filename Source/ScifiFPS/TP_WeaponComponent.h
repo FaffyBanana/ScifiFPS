@@ -49,7 +49,7 @@ public:
 
 	/* Get the total ammunition count of the current weapon */
 	UFUNCTION(BlueprintCallable)
-	int32 GetTotalAmmoOfCurrentWeapon() const;
+	int32 GetReserveAmmoOfCurrentWeapon() const;
 
 	/* Get boolean to see if player is firing */
 	UFUNCTION(BlueprintCallable)
@@ -79,7 +79,7 @@ private:
 	
 
 	/* Get the maximum ammount the current weapon can reload up to */
-	int32 GetMaximumAmmunitionOfCurrentWeapon() const;
+	int32 GetMaxAmmoCatridgeOfCurrentWeapon() const;
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -146,7 +146,12 @@ private:
 	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
 
-	//void SpawnGun(const AGunBase* gun, const TSubclassOf<AGunBase> gunRef);
+	void InitWeapons();
+
+	void InitADSTimeline();
+
+	AGunBase* SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FTransform transform, const FActorSpawnParameters spawnInfo);
+	AGunBase* SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FVector location, const FRotator rotator, const FActorSpawnParameters spawnInfo);
 
 private:
 	/** MappingContext */
@@ -171,11 +176,11 @@ private:
 
 	/* Primary gun */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	AGunBase* PrimaryGun;
+	AGunBase* PrimaryWeapon;
 
 	/* Secondary gun */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	AGunBase* SecondaryGun;
+	AGunBase* SecondaryWeapon;
 
 	UPROPERTY()
 	UTimelineComponent* ADSCurveTimeline; // Timeline component for aiming down sights
@@ -197,7 +202,7 @@ private:
 	int32 m_weaponIndex;
 
 	//Array that holds all weapons (guns) as child actors 
-	TArray<AGunBase*> m_gunArray;
+	TArray<AGunBase*> m_weaponArray;
 
 	/* Ammunition mappings */
 	TMap<EAmmunitionType, bool> m_isWeaponActiveMap; // Which weapon is active currently

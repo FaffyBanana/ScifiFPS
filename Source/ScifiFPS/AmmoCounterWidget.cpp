@@ -22,5 +22,5 @@ FText UAmmoCounterWidget::GetAmmoText() const
 
 FText UAmmoCounterWidget::GetTotalAmmoText() const
 {
-	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetTotalAmmoOfCurrentWeapon());
+	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetReserveAmmoOfCurrentWeapon());
 }

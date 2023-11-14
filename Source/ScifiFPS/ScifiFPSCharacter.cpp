@@ -29,7 +29,8 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	/* Create a CameraComponent */
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
+	const FVector fpsCameraLocation(-10.f, 0.f, 60.f);
+	FirstPersonCameraComponent->SetRelativeLocation(fpsCameraLocation); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
 	/* Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn) */
@@ -38,12 +39,14 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
-	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+	const FVector mesh1PLocation(-30.f, 0.f, -150.f);
+	Mesh1P->SetRelativeLocation(mesh1PLocation);
 
 	/* Create a weapon placement component that weapons will attach to */
 	WeaponPlacementComponent = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponPlacement"));
 	WeaponPlacementComponent->SetupAttachment(FirstPersonCameraComponent);
-	WeaponPlacementComponent->SetRelativeLocation(FVector(20.0f, 20.0f, -20.0f));
+	const FVector weaponPlacementLocation(20.0f, 20.0f, -20.0f);
+	WeaponPlacementComponent->SetRelativeLocation(weaponPlacementLocation);
 
 	/* Components */
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("WeaponComponent"));

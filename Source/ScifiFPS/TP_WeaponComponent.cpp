@@ -53,65 +53,21 @@ void UTP_WeaponComponent::BeginPlay()
 
 	if (Character)
 	{
-		/* Spawn all guns */
-		FTransform transform = Character->GetWeaponPlacementComponent()->GetComponentTransform();
-		FActorSpawnParameters spawnInfo;
-		PrimaryGun = GetWorld()->SpawnActor<AGunBase>(PrimaryWeaponRef, transform, spawnInfo);
-		SecondaryGun = GetWorld()->SpawnActor<AGunBase>(SecondaryWeaponRef, transform, spawnInfo);
-
-		/* Set primary gun defaults */
-		if (PrimaryGun)
-		{
-			m_gunArray.Add(PrimaryGun);
-			m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
-			m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
-		}
-
-		/* Set secondary gun defaults */
-		if (SecondaryGun)
-		{
-			m_gunArray.Add(SecondaryGun);
-			m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
-			m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
-		}
-
-		/* Set current weapon as active */
-		m_isWeaponActiveMap[m_currentWeapon] = true;
-
-		/* ADS Timeline */
-		if (ADSCurveFloat)
-		{
-			/* Create ADS curve timeline */
-			ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("ADSTimelineAnimation"));
-			ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
-			Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
-
-			/* Bind the ADS function to the timeline */
-			FOnTimelineFloat onTimelineCallback;
-			onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
-			ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
-			ADSCurveTimeline->SetLooping(false);
-			ADSCurveTimeline->RegisterComponent();
-
-			/* ADS variable defaults */
-		
-			m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
-			m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
-			m_fOV = Character->GetFirstPersonCameraComponent()->FieldOfView;
-		}
-
-
-		InventoryComponent = Character->FindComponentByClass<UInventoryComponent>();
-		AttachWeapon();
+		InventoryComponent = Character->GetInventoryComponent();
+		InitWeapons();
+		InitADSTimeline();
 	}
 }
 
 void UTP_WeaponComponent::AttachWeapon()
 {
 	/* Setup weapon attachment */
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	PrimaryGun->GetGunSkeletalMeshComponent()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-	SecondaryGun->GetGunSkeletalMeshComponent()->AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	const FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, true);
+	for(int i = 0; i < m_weaponArray.Num(); i++)
+	{
+		m_weaponArray[i]->GetGunSkeletalMeshComponent()->
+			AttachToComponent(Character->GetMesh1P(), attachmentRules, FName(TEXT("GripPoint")));
+	}
 
 	// switch bHasRifle so the animation blueprint can switch to another animation set
 	Character->SetHasRifle(true);
@@ -157,7 +113,7 @@ void UTP_WeaponComponent::RaycastShot()
 	FCollisionQueryParams traceParams;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, traceParams);
 
-	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 2.0f); // DEBUG -----------------------
+	//DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 2.0f); // DEBUG -----------------------
 
 	// If line trace has hit an object
 	if (bHit)
@@ -167,7 +123,7 @@ void UTP_WeaponComponent::RaycastShot()
 		if (enemyManager)
 		{
 			enemyManager->GetHealthComponent()->TakeDamage();
-			DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
+			//DrawDebugBox(GetWorld(), hit.ImpactPoint, FVector(5, 5, 5), FColor::Blue, false, 2.0f); // DEBUG -----------------------
 		}
 	}
 }
@@ -199,7 +155,7 @@ void UTP_WeaponComponent::Fire()
 		// If the player has no ammunition 
 		if (GetCurrentAmmoOfCurrentWeapon() == 0 && m_bCanShoot)
 		{
-			GetTotalAmmoOfCurrentWeapon() == 0 ? StopFire() : StartReloadWeaponTimer();
+			ShouldPlayerReload() ? StartReloadWeaponTimer() : StopFire();
 		}
 	}
 }
@@ -230,18 +186,85 @@ void UTP_WeaponComponent::ClearReloadWeaponTimer()
 
 bool UTP_WeaponComponent::ShouldPlayerReload() const
 {
-	// If the player hasn't run out of ammo compeletely
-	// And doesn't have a full magazine
-	if (GetTotalAmmoOfCurrentWeapon() != 0)
-		return GetCurrentAmmoOfCurrentWeapon() < GetMaximumAmmunitionOfCurrentWeapon() ? true : false;
+	if (GetReserveAmmoOfCurrentWeapon() != 0)
+		return GetCurrentAmmoOfCurrentWeapon() < GetMaxAmmoCatridgeOfCurrentWeapon() ? true : false;
 
 	return false;
 }
 
 void UTP_WeaponComponent::PlayGunShotSFX()
 {
-	if (m_gunArray[m_weaponIndex]->FireSound != nullptr)
-		UGameplayStatics::PlaySoundAtLocation(this, m_gunArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
+	if (m_weaponArray[m_weaponIndex]->FireSound != nullptr)
+		UGameplayStatics::PlaySoundAtLocation(this, m_weaponArray[m_weaponIndex]->FireSound, Character->GetActorLocation());
+}
+
+void UTP_WeaponComponent::InitWeapons()
+{
+	/* Spawn guns */
+	const FTransform weaponPlacementTransform = Character->GetWeaponPlacementComponent()->GetComponentTransform();
+	const FActorSpawnParameters spawnInfo;
+	PrimaryWeapon = SpawnWeapon(PrimaryWeaponRef, weaponPlacementTransform, spawnInfo);
+	SecondaryWeapon = SpawnWeapon(SecondaryWeaponRef, weaponPlacementTransform, spawnInfo);
+
+	/* Set primary gun defaults */
+	if (PrimaryWeapon)
+	{
+		m_weaponArray.Add(PrimaryWeapon);
+		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
+		m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
+	}
+
+	/* Set secondary gun defaults */
+	if (SecondaryWeapon)
+	{
+		m_weaponArray.Add(SecondaryWeapon);
+		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
+		m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
+	}
+
+	AttachWeapon();
+
+	if (!m_weaponArray.IsEmpty())
+	{
+		/* Set current weapon as active */
+		m_isWeaponActiveMap[m_currentWeapon] = true;
+	}
+}
+
+void UTP_WeaponComponent::InitADSTimeline()
+{
+	/* ADS Timeline */
+	if (ADSCurveFloat)
+	{
+		/* Create ADS curve timeline */
+		ADSCurveTimeline = NewObject<UTimelineComponent>(this, FName("ADSTimelineAnimation"));
+		ADSCurveTimeline->CreationMethod = EComponentCreationMethod::SimpleConstructionScript;
+		Character->BlueprintCreatedComponents.Add(ADSCurveTimeline);
+
+		/* Bind the ADS function to the timeline */
+		FOnTimelineFloat onTimelineCallback;
+		onTimelineCallback.BindUFunction(this, FName(TEXT("AimInTimelineProgress")));
+		ADSCurveTimeline->AddInterpFloat(ADSCurveFloat, onTimelineCallback);
+		ADSCurveTimeline->SetLooping(false);
+		ADSCurveTimeline->RegisterComponent();
+
+		/* ADS variable defaults */
+		m_weaponPlacementLocation = Character->GetWeaponPlacementComponent()->GetRelativeLocation();
+		m_meshPlacementLocation = Character->GetMesh1P()->GetRelativeLocation();
+		m_fOV = Character->GetFirstPersonCameraComponent()->FieldOfView;
+	}
+}
+
+AGunBase* UTP_WeaponComponent::SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FTransform transform, const FActorSpawnParameters spawnInfo)
+{
+	/* Spawn all guns */
+	return GetWorld()->SpawnActor<AGunBase>(weaponRef, transform, spawnInfo);
+}
+
+AGunBase* UTP_WeaponComponent::SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FVector location, const FRotator rotator, const FActorSpawnParameters spawnInfo)
+{
+	/* Spawn all guns */
+	return GetWorld()->SpawnActor<AGunBase>(weaponRef, location, rotator, spawnInfo);
 }
 
 void UTP_WeaponComponent::AimInSight()
@@ -264,7 +287,7 @@ void UTP_WeaponComponent::AimOutSight()
 void UTP_WeaponComponent::AimInTimelineProgress(float value)
 {
 	// Get location of the aim socket on the gun
-	FVector aimSocketLocation = m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()
+	FVector aimSocketLocation = m_weaponArray[m_weaponIndex]->GetGunSkeletalMeshComponent()
 		->GetSocketTransform(FName(TEXT("ADS_Socket")), ERelativeTransformSpace::RTS_Actor).GetLocation();
 
 	// Create a vector for the camera ADS
@@ -306,7 +329,6 @@ void UTP_WeaponComponent::ReloadWeapon()
 	// Calculate the ammunition counter of the weapon after reload
 	InventoryComponent->ReloadWeapon(m_currentWeapon);
 	
-	// Clear the reload timer
 	ClearReloadWeaponTimer();
 
 	m_bIsReloading = false;
@@ -323,34 +345,29 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 	int tempWeaponIndex = tempValue + m_weaponIndex;
 
 	// If index exists is in array
-	if (m_gunArray.IsValidIndex(tempWeaponIndex))
+	if (m_weaponArray.IsValidIndex(tempWeaponIndex))
 	{
 		m_weaponIndex = tempWeaponIndex;
 	}
 
-	// If player has scrolled to an index that doesn't exist in the array
+	// Otherwise go to the top or the bottom of the array depedning on the direction of the mouse scroll
 	else
 	{
-		/* If the player has scrolled down go back to top of the array,
-			if player has scrolled up go back to the bottom of the array */
-		m_weaponIndex < 0 ? m_weaponIndex = m_gunArray.Num() - 1 : m_weaponIndex = 0;
+		m_weaponIndex < 0 ? m_weaponIndex = m_weaponArray.Num() - 1 : m_weaponIndex = 0;
 	}
 
 	SwitchToNextWeapon();
-
 	StopFire();
-
 	ClearReloadWeaponTimer();
-
-	ShouldPlayerReload() ? StartReloadWeaponTimer() : m_bCanShoot = true;
+	GetReserveAmmoOfCurrentWeapon() == 0 ? StartReloadWeaponTimer() : m_bCanShoot = true;
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
 {
 	/* Set gun actors as invisible */
-	for (int i = 0; i < m_gunArray.Num(); i++)
+	for (int i = 0; i < m_weaponArray.Num(); i++)
 	{
-		m_gunArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
+		m_weaponArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
 	}
 
 	/* Set all gun as inactive */
@@ -378,21 +395,21 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	}
 
 	// Set current weapon to be visible and active
-	m_gunArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->SetVisibility(true);
+	m_weaponArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->SetVisibility(true);
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
 }
 int32 UTP_WeaponComponent::GetCurrentAmmoOfCurrentWeapon() const
 {
-	return InventoryComponent->GetAmmoCount(m_currentWeapon);
+	return InventoryComponent->GetCurrentAmmoCount(m_currentWeapon);
 }
 
-int32 UTP_WeaponComponent::GetTotalAmmoOfCurrentWeapon() const
+int32 UTP_WeaponComponent::GetReserveAmmoOfCurrentWeapon() const
 {
-	return InventoryComponent->GetTotalAmmoCount(m_currentWeapon);
+	return InventoryComponent->GetReserveAmmoCount(m_currentWeapon);
 }
 
-int32 UTP_WeaponComponent::GetMaximumAmmunitionOfCurrentWeapon() const
+int32 UTP_WeaponComponent::GetMaxAmmoCatridgeOfCurrentWeapon() const
 {
 	return InventoryComponent->GetMaxAmmoInCatridgeCount(m_currentWeapon);
 }
