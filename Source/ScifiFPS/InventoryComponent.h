@@ -58,7 +58,7 @@ public:
 	int8 DefaultMaxPrimaryAmmunition = 30; // Default maximum ammunition in primary weapon
 
 	UPROPERTY()
-	int8 DefaultMaxSecondaryAmmunition = 30; // Default maximum ammunition in secondary waepon
+	int8 DefaultMaxSecondaryAmmunition = 30; // Default maximum ammunition in secondary weapon
 
 	UPROPERTY()
 	int8 DefaultTotalPrimaryAmmunition = 120; // Default reserve ammuntion in primary weapon

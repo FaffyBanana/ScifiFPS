@@ -43,11 +43,11 @@ public:
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
-	/* Get the current ammunition count of the current weapon */
+	/* Get the current ammunition count of the current weapon from inventory component */
 	UFUNCTION(BlueprintCallable)
 	int32 GetCurrentAmmoOfCurrentWeapon() const;
 
-	/* Get the total ammunition count of the current weapon */
+	/* Get the total ammunition count of the current weapon from inventory component */
 	UFUNCTION(BlueprintCallable)
 	int32 GetReserveAmmoOfCurrentWeapon() const;
 
@@ -76,10 +76,13 @@ protected:
 	UCurveFloat* ADSCurveFloat; // Curve float for aiming down sights
 
 private:
-	
+	/** Begin play event */
+	UFUNCTION()
+	virtual void BeginPlay();
 
-	/* Get the maximum ammount the current weapon can reload up to */
-	int32 GetMaxAmmoCatridgeOfCurrentWeapon() const;
+	/** Ends gameplay for this component. */
+	UFUNCTION()
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -89,13 +92,14 @@ private:
 	UFUNCTION()
 	void SwitchWeapons(const FInputActionValue& index);
 
-	/** Begin play event */
-	UFUNCTION()
-	virtual void BeginPlay();
+	/* Set weapon defaults */
+	void InitWeapons();
 
-	/** Ends gameplay for this component. */
-	UFUNCTION()
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	/* Set aim down site curve and timeline defaults */
+	void InitADSTimeline();
+
+	/* Get the maximum ammount the current weapon can reload up to */
+	int32 GetMaxAmmoCatridgeOfCurrentWeapon() const;
 
 	/* Aim down scope of gun */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
@@ -146,11 +150,10 @@ private:
 	/* Play sound effects for shooting the weapon */
 	void PlayGunShotSFX();
 
-	void InitWeapons();
-
-	void InitADSTimeline();
-
+	/* Spawn weapon using transform and reference */
 	AGunBase* SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FTransform transform, const FActorSpawnParameters spawnInfo);
+
+	/* Spawn weapon using location, rotation and reference */
 	AGunBase* SpawnWeapon(const TSubclassOf<AGunBase> weaponRef, const FVector location, const FRotator rotator, const FActorSpawnParameters spawnInfo);
 
 private:
@@ -186,8 +189,8 @@ private:
 	UTimelineComponent* ADSCurveTimeline; // Timeline component for aiming down sights
 
 	/* Location of primary gun ADS location */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	FVector MeshADSLocation; 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	//FVector MeshADSLocation; 
 	
 	// The Character holding this weapon 
 	AScifiFPSCharacter* Character;
@@ -208,6 +211,8 @@ private:
 	TMap<EAmmunitionType, bool> m_isWeaponActiveMap; // Which weapon is active currently
 	TMap<EAmmunitionType, bool> m_isAutomaticMap; // Which weapons are automatic 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	TMap<EAmmunitionType, FVector> MeshArmsADSLocation;
 	// Holds what weapon is currently active
 	EAmmunitionType m_currentWeapon; 
 
@@ -244,6 +249,7 @@ private:
 	float m_aDSFOV;
 	float m_aDSDistanceToCamera;
 
+	/* FOV of camera */
 	float m_fOV;
 };
 

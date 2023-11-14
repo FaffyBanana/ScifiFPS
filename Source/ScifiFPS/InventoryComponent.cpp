@@ -45,10 +45,9 @@ void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 		m_currentAmmunitionCount[ammo] = m_maxAmmunitionInCatridge[ammo];
 	}
 
-	/* If there isn't enough reserve ammunition to refill a full magazine */
 	else if (m_reserveAmmunitionCount[ammo] < m_maxAmmunitionInCatridge[ammo] && m_reserveAmmunitionCount[ammo] > 0)
 	{
-		/* If there isn't enough reserve for a full clip */
+		/* If there isn't enough reserve for a full magazine */
 		if (m_reserveAmmunitionCount[ammo] < (m_maxAmmunitionInCatridge[ammo] - m_currentAmmunitionCount[ammo]))
 		{
 			m_currentAmmunitionCount[ammo] += m_reserveAmmunitionCount[ammo];
@@ -62,10 +61,9 @@ void UInventoryComponent::ReloadWeapon(EAmmunitionType ammo)
 		}
 	}
 
-	/* If the reserve ammunition goes below zero */
 	else
 	{
-		m_reserveAmmunitionCount[ammo] = 0;
+		m_reserveAmmunitionCount[ammo] = 0; // Just for safety incase ammunition does go below zero
 	}
 }
 
