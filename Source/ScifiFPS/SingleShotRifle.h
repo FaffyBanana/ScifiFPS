@@ -27,5 +27,7 @@ UCLASS()
 class SCIFIFPS_API ASingleShotRifle : public AGunBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	ASingleShotRifle();
 };

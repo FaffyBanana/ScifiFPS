@@ -10,7 +10,9 @@ AGunBase::AGunBase()
 	PrimaryActorTick.bCanEverTick = false;
 
 	GunSkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMeshComponent"));
-
+	ScopeMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ScopeMeshComponent"));
+	ScopeMeshComponent->SetupAttachment(GunSkeletalMeshComponent);
+	ScopeMeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 	SetRootComponent(GunSkeletalMeshComponent);
 }
 

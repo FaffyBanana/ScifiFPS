@@ -211,8 +211,6 @@ private:
 	TMap<EAmmunitionType, bool> m_isWeaponActiveMap; // Which weapon is active currently
 	TMap<EAmmunitionType, bool> m_isAutomaticMap; // Which weapons are automatic 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	TMap<EAmmunitionType, FVector> MeshArmsADSLocation;
 	// Holds what weapon is currently active
 	EAmmunitionType m_currentWeapon; 
 
@@ -221,17 +219,17 @@ private:
 	TSubclassOf<AGunBase> SecondaryWeaponRef;
 
 	/* If player can shoot */
-	bool m_bCanShoot;
+	bool m_canShoot;
 
 	/* Is player firing weapons (Used for animations) */
-	bool m_bIsFiring;
+	bool m_isFiring;
 
 	/* Bool for if the character is reloading or not
 					(Used for animations) */
-	bool m_bIsReloading;
+	bool m_isReloading;
 
 	/* Bool for if the character is aiming in or not */
-	bool m_bIsAimingIn;
+	bool m_isAimingIn;
 
 	/* How long it takes to reload */
 	float m_reloadTime;

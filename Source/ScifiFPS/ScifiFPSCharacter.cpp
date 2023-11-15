@@ -54,7 +54,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
 	/* Find the gameover menu widget */
-	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/FirstPerson/UI/WBP_Gameover"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> GameOverWidgetClassFinder(TEXT("/Game/Sci-fiFPS/UI/WBP_Gameover"));
 	if (GameOverWidgetClassFinder.Class)
 	{
 		GameOverWidgetClass = GameOverWidgetClassFinder.Class;
@@ -63,7 +63,7 @@ AScifiFPSCharacter::AScifiFPSCharacter()
 	// Set default walk speed
 	GetCharacterMovement()->MaxWalkSpeed = m_defaultWalkSpeed;
 
-	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/FirstPerson/Blueprints/Widgets/WBP_PlayerHUD"));
+	/*static ConstructorHelpers::FClassFinder<UUserWidget> playerHUDWidgetClassFinder(TEXT("/Game/Sci-fiFPS/Blueprints/Widgets/WBP_PlayerHUD"));
 	if (playerHUDWidgetClassFinder.Class)
 	{
 		PlayerHUDWidgetClass = playerHUDWidgetClassFinder.Class;
@@ -171,12 +171,12 @@ void AScifiFPSCharacter::StopSprint()
 
 void AScifiFPSCharacter::SetHasRifle(const bool bNewHasRifle)
 {
-	m_bHasRifle = bNewHasRifle;
+	m_hasRifle = bNewHasRifle;
 }
 
 bool AScifiFPSCharacter::GetHasRifle() const
 {
-	return m_bHasRifle;
+	return m_hasRifle;
 }
 
 UHealthComponent* AScifiFPSCharacter::GetHealthComponent() const

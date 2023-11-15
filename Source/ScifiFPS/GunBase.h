@@ -38,6 +38,12 @@ public:
 	/* Returns the skeletal mesh of the gun */
 	USkeletalMeshComponent* GetGunSkeletalMeshComponent() const;
 
+	/*UFUNCTION(BlueprintCallable)
+	UStaticMeshComponent* GetScopeMeshComponent() const;*/
+
+	/* Position where the scope is when aiming down sights */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ADS)
+	FVector ADSLocation;
 public:
 	///** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -56,6 +62,9 @@ private:
 	/** Skeletal mesh of weapon */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* GunSkeletalMeshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UStaticMeshComponent* ScopeMeshComponent;
 
 
 };

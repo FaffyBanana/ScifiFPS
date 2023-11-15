@@ -21,23 +21,23 @@ UTP_WeaponComponent::UTP_WeaponComponent()
 	,ShootingDistance (2000.0f) 
 	,m_weaponIndex (0)
 	,m_currentWeapon (EAmmunitionType::AE_Primary)
-	,m_bCanShoot (true)
-	,m_bIsFiring (false)
-	,m_bIsReloading (false)
-	,m_bIsAimingIn (false)
+	,m_canShoot (true)
+	,m_isFiring (false)
+	,m_isReloading (false)
+	,m_isAimingIn (false)
 	,m_reloadTime (2.25f)
 	,m_aDSFOV (75.0f)
 	,m_aDSDistanceToCamera (10.0f)
 {
 	/* Find the blueprint Primary Gun Class through reference */
-	static ConstructorHelpers::FClassFinder<AGunBase> PrimaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_AutomaticRifle"));
+	static ConstructorHelpers::FClassFinder<AGunBase> PrimaryWeaponFinder(TEXT("/Game/Sci-fiFPS/Blueprints/Weapon/BP_AutomaticRifle"));
 	if (PrimaryWeaponFinder.Class)
 	{
 		PrimaryWeaponRef = PrimaryWeaponFinder.Class;
 	}
 
 	/* Find the blueprint Secondary Gun Class through reference */
-	static ConstructorHelpers::FClassFinder<AGunBase> SecondaryWeaponFinder(TEXT("/Game/FirstPerson/Blueprints/Weapon/BP_SingleShotRifle"));
+	static ConstructorHelpers::FClassFinder<AGunBase> SecondaryWeaponFinder(TEXT("/Game/Sci-fiFPS/Blueprints/Weapon/BP_SingleShotRifle"));
 	if (SecondaryWeaponFinder.Class)
 	{
 		SecondaryWeaponRef = SecondaryWeaponFinder.Class;
@@ -97,14 +97,14 @@ void UTP_WeaponComponent::AttachWeapon()
 
 void UTP_WeaponComponent::RaycastShot()
 {
-	FVector loc;
-	FRotator rot;
+	FVector location;
+	FRotator rotaton;
 	FHitResult hit;
 
-	Character->GetController()->GetPlayerViewPoint(loc, rot);
+	Character->GetController()->GetPlayerViewPoint(location, rotaton);
 
-	FVector start = loc;
-	FVector end = start + (rot.Vector() * ShootingDistance);
+	FVector start = location;
+	FVector end = start + (rotaton.Vector() * ShootingDistance);
 
 	// Send line trace from players pov
 	FCollisionQueryParams traceParams;
@@ -135,9 +135,9 @@ void UTP_WeaponComponent::Fire()
 	if (InventoryComponent)
 	{
 		// If the player has ammunition and can shoot
-		if (GetCurrentAmmoOfCurrentWeapon() != 0 && m_bCanShoot)
+		if (GetCurrentAmmoOfCurrentWeapon() != 0 && m_canShoot)
 		{
-			m_bIsFiring = true;
+			m_isFiring = true;
 
 			// Decrement ammunition counter of current weapon
 			InventoryComponent->ConsumeAmmo(m_currentWeapon);
@@ -150,7 +150,7 @@ void UTP_WeaponComponent::Fire()
 		}
 
 		// If the player has no ammunition in magazine
-		if (GetCurrentAmmoOfCurrentWeapon() == 0 && m_bCanShoot)
+		if (GetCurrentAmmoOfCurrentWeapon() == 0 && m_canShoot)
 		{
 			ShouldPlayerReload() ? StartReloadWeaponTimer() : StopFire();
 		}
@@ -159,11 +159,11 @@ void UTP_WeaponComponent::Fire()
 
 void UTP_WeaponComponent::StartReloadWeaponTimer()
 {
-	if (ShouldPlayerReload() && m_bCanShoot)
+	if (ShouldPlayerReload() && m_canShoot)
 	{
-		m_bCanShoot = false; // Stop the player from shooting
+		m_canShoot = false; // Stop the player from shooting
 
-		m_bIsReloading = true;
+		m_isReloading = true;
 
 		AimOutSight();
 
@@ -204,10 +204,6 @@ void UTP_WeaponComponent::InitWeapons()
 		m_weaponArray.Add(PrimaryWeapon);
 		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Primary, false);
 		m_isAutomaticMap.Add(EAmmunitionType::AE_Primary, true);
-
-		FVector primaryMeshArms(-16.000000, 1.500000, -166.950000);
-		MeshArmsADSLocation.Add(EAmmunitionType::AE_Primary, primaryMeshArms);
-
 	}
 
 	/* Set secondary gun defaults */
@@ -216,9 +212,6 @@ void UTP_WeaponComponent::InitWeapons()
 		m_weaponArray.Add(SecondaryWeapon);
 		m_isWeaponActiveMap.Add(EAmmunitionType::AE_Secondary, false);
 		m_isAutomaticMap.Add(EAmmunitionType::AE_Secondary, false);
-		FVector secondaryMeshArms(-16.000000, 1.500000, -164.950000);
-		MeshArmsADSLocation.Add(EAmmunitionType::AE_Secondary, secondaryMeshArms);
-
 	}
 
 	AttachWeapon();
@@ -266,9 +259,9 @@ AGunBase* UTP_WeaponComponent::SpawnWeapon(const TSubclassOf<AGunBase> weaponRef
 
 void UTP_WeaponComponent::AimInSight()
 {
-	if (!m_bIsReloading)
+	if (!m_isReloading)
 	{
-		m_bIsAimingIn = true;
+		m_isAimingIn = true;
 		
 		PlayADSTimeline();
 	}
@@ -276,7 +269,7 @@ void UTP_WeaponComponent::AimInSight()
 
 void UTP_WeaponComponent::AimOutSight()
 {
-	m_bIsAimingIn = false;
+	m_isAimingIn = false;
 
 	ReverseADSTimeline();
 }
@@ -299,7 +292,7 @@ void UTP_WeaponComponent::AimInTimelineProgress(float value)
 	Character->GetFirstPersonCameraComponent()->SetFieldOfView(tempADSFOV);
 
 	// Lerp the mesh arms to move from non-ADS position to ADS position using the timeline's alpha value
-	const FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, MeshArmsADSLocation[m_currentWeapon], value);
+	const FVector meshLerp = UKismetMathLibrary::VLerp(m_meshPlacementLocation, m_weaponArray[m_weaponIndex]->ADSLocation, value);
 	Character->GetMesh1P()->SetRelativeLocation(meshLerp);
 
 }
@@ -327,10 +320,10 @@ void UTP_WeaponComponent::ReloadWeapon()
 	
 	ClearReloadWeaponTimer();
 
-	m_bIsReloading = false;
+	m_isReloading = false;
 
 	// Allow the player to shoot again
-	m_bCanShoot = true;
+	m_canShoot = true;
 }
 
 void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
@@ -355,7 +348,11 @@ void UTP_WeaponComponent::SwitchWeapons(const FInputActionValue& index)
 	SwitchToNextWeapon();
 	StopFire();
 	ClearReloadWeaponTimer();
-	GetReserveAmmoOfCurrentWeapon() == 0 ? StartReloadWeaponTimer() : m_bCanShoot = true;
+	GetReserveAmmoOfCurrentWeapon() == 0 ? StartReloadWeaponTimer() : m_canShoot = true; // Automatic reload
+	if (m_isAimingIn)
+	{
+		AimOutSight();
+	}
 }
 
 void UTP_WeaponComponent::SwitchToNextWeapon()
@@ -363,7 +360,8 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	/* Set gun actors as invisible */
 	for (int i = 0; i < m_weaponArray.Num(); i++)
 	{
-		m_weaponArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
+		//m_weaponArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
+		m_weaponArray[i]->SetActorHiddenInGame(true);
 	}
 
 	/* Set all gun as inactive */
@@ -391,7 +389,7 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	}
 
 	// Set current weapon to be visible and active
-	m_weaponArray[m_weaponIndex]->GetGunSkeletalMeshComponent()->SetVisibility(true);
+	m_weaponArray[m_weaponIndex]->SetActorHiddenInGame(false);
 	m_isWeaponActiveMap[m_currentWeapon] = true;
 
 }
@@ -410,7 +408,7 @@ void UTP_WeaponComponent::StopFire()
 {
 	// Clear automatic shooting timer 
 	Character->GetWorldTimerManager().ClearTimer(m_handleRefire);
-	m_bIsFiring = false;
+	m_isFiring = false;
 }
 
 int32 UTP_WeaponComponent::GetCurrentAmmoOfCurrentWeapon() const
@@ -430,17 +428,17 @@ int32 UTP_WeaponComponent::GetMaxAmmoCatridgeOfCurrentWeapon() const
 
 bool UTP_WeaponComponent::GetIsFiring() const
 {
-	return m_bIsFiring;
+	return m_isFiring;
 }
 
 bool UTP_WeaponComponent::GetIsReloading() const
 {
-	return m_bIsReloading;
+	return m_isReloading;
 }
 
 bool UTP_WeaponComponent::GetIsAimingIn() const
 {
-	return m_bIsAimingIn;
+	return m_isAimingIn;
 }
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -28,4 +28,6 @@ class SCIFIFPS_API AAutomaticRifle : public AGunBase
 {
 	GENERATED_BODY()
 	
+public:
+	AAutomaticRifle();
 };

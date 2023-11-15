@@ -143,7 +143,7 @@ private:
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
-	bool m_bHasRifle;
+	bool m_hasRifle;
 
 	/* Default Walk Speed */
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
