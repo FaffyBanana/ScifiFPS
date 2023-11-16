@@ -10,6 +10,10 @@ AEnemyAIManager::AEnemyAIManager()
 
 	UpdateMaxWalkSpeed(120.0f);
 
+	SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComponent"));
+	SphereCollisionComponent->SetSphereRadius(100.0f);
+
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 	ShotPercentage = 1;
@@ -25,11 +29,23 @@ void AEnemyAIManager::BeginPlay()
 	//{
 	//	//WeaponComponent->AttachWeapon(GetMesh()); 
 	//}
+
+	SphereCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyAIManager::OnOverlapBegin);
+
 }
 
 bool AEnemyAIManager::ShotHitChance(const uint32 percentage) const
 {
 	return (FMath::RandRange(1, 100/percentage) == 1 ? true : false);
+}
+
+void AEnemyAIManager::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(OtherActor);
+	if (player)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Player in close proximity"));
+	}
 }
 
 // Called every frame

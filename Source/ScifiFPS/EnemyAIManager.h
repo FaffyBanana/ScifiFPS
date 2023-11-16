@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "TP_WeaponComponent.h"
 #include "HealthComponent.h"
+#include "Components/SphereComponent.h"
 #include "EnemyAIManager.generated.h"
 
 /*****************************************************************************************************
@@ -34,14 +35,6 @@ public:
 	// Sets default values for this character's properties
 	AEnemyAIManager();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-private:
-	bool ShotHitChance(const uint32 percentage) const; // Chance of shot being hit
-
-public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -56,6 +49,7 @@ public:
 	UHealthComponent* GetHealthComponent() const;
 
 	void Death();
+
 public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	class UBehaviorTree* BehaviourTree;
@@ -64,5 +58,20 @@ public:
 	UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere)
-	uint32 ShotPercentage;
+	int32 ShotPercentage;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+private:
+	bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
+
+
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereCollisionComponent;
+
 };

@@ -128,7 +128,6 @@ private:
 	// This is the total amount of ammunition the player has 
 	TMap<EAmmunitionType, int8> m_reserveAmmunitionCount;
 
-	// Reference to struct that holds the ammunitions default variables 
-	FAmmunition m_ammunitionSettings;
+	
 
 };

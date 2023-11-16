@@ -10,6 +10,9 @@ UInventoryComponent::UInventoryComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
+	// Reference to struct that holds the ammunitions default variables 
+	const FAmmunition m_ammunitionSettings;
+
 	// Set max ammunition of each weapon
 	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Primary, m_ammunitionSettings.DefaultMaxPrimaryAmmunition);
 	m_maxAmmunitionInCatridge.Add(EAmmunitionType::AE_Secondary, m_ammunitionSettings.DefaultMaxSecondaryAmmunition);

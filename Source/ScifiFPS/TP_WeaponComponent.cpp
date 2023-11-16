@@ -360,7 +360,6 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 	/* Set gun actors as invisible */
 	for (int i = 0; i < m_weaponArray.Num(); i++)
 	{
-		//m_weaponArray[i]->GetGunSkeletalMeshComponent()->SetVisibility(false);
 		m_weaponArray[i]->SetActorHiddenInGame(true);
 	}
 
@@ -396,7 +395,6 @@ void UTP_WeaponComponent::SwitchToNextWeapon()
 
 void UTP_WeaponComponent::StartFire()
 {
-	// Fire weapon 
 	Fire();
 	
 	if (m_isAutomaticMap[m_currentWeapon])
