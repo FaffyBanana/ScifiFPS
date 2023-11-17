@@ -11,6 +11,7 @@ AEnemyAIManager::AEnemyAIManager()
 	UpdateMaxWalkSpeed(120.0f);
 
 	SphereCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComponent"));
+	SphereCollisionComponent->SetupAttachment(RootComponent);
 	SphereCollisionComponent->SetSphereRadius(100.0f);
 
 
