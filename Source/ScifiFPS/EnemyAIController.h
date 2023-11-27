@@ -30,8 +30,12 @@ public:
 	
 	FORCEINLINE UBlackboardComponent* GetBlackboardComp() const;
 
-	//UFUNCTION()
-	//void OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAIStimulus Stimulus);
+	void SetPlayerInCloseRange(const bool boolean);
+
+	void SetPlayerActor(AActor* PlayerActor);
+
+	UFUNCTION()
+	void OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAIStimulus Stimulus);
 
 private:
 	virtual void OnPossess(APawn* pawn) override;
@@ -40,36 +44,36 @@ private:
 
 	void StartEnemyTimer();
 public:
-	//UPROPERTY(VisibleAnywhere, Category = "AI")
-	//TObjectPtr<UAIPerceptionComponent> PerceptionComp = nullptr; // Perception Component
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	TObjectPtr<UAIPerceptionComponent> PerceptionComp = nullptr; // Perception Component
 
-	//UPROPERTY(EditAnywhere, Category = "AI")
-	//TObjectPtr<class UAISenseConfig_Sight> SightConfig = nullptr; // Sight configuration
+	UPROPERTY(EditAnywhere, Category = "AI")
+	TObjectPtr<class UAISenseConfig_Sight> SightConfig = nullptr; // Sight configuration
 
-	//UPROPERTY(EditAnywhere, Category = "AI")
-	//UAISenseConfig_Hearing* HearingConfig; // Hearing configuration
+	UPROPERTY(EditAnywhere, Category = "AI")
+	UAISenseConfig_Hearing* HearingConfig; // Hearing configuration
 
 private:
 	UBehaviorTreeComponent* BehaviourTreeComp;
 	UBlackboardComponent* BlackboardComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	FName m_enemyActor; // Target
+	FName m_playerActor; // Target
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName m_isPlayerInCloseRange;
 
 	//UPROPERTY(EditDefaultsOnly, Category = "AI")
-	//FName m_hasLineOfSight; 
+	FName m_hasLineOfSight; 
 
 	//UPROPERTY(EditDefaultsOnly, Category = "AI")
-	//FName m_patrolLocation; // Target
+	FName m_patrolLocation; // Target
 
 
-	//float m_sightRadius; // Sight radius
-	//float m_loseSightRadius; // Lose sight radius
-	//float m_peripheralVisionAngleDegrees; // Peripheral vision
-	//float m_chaseSpeed; // Enemy run (chase) speed
+	float m_sightRadius; // Sight radius
+	float m_loseSightRadius; // Lose sight radius
+	float m_peripheralVisionAngleDegrees; // Peripheral vision
+	float m_chaseSpeed; // Enemy run (chase) speed
 
-	//FTimerHandle m_enemyTimer;
+	FTimerHandle m_enemyTimer;
 };

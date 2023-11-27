@@ -1,5 +1,6 @@
 #include "EnemyAIManager.h"
 #include "ScifiFPSCharacter.h"
+#include "EnemyAIController.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -32,6 +33,7 @@ void AEnemyAIManager::BeginPlay()
 	//}
 
 	SphereCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyAIManager::OnOverlapBegin);
+	//SphereCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemyAIManager::OnOverlapEnd);
 
 }
 
@@ -45,7 +47,31 @@ void AEnemyAIManager::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(OtherActor);
 	if (player)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Player in close proximity"));
+		AEnemyAIController* controllerAI = Cast<AEnemyAIController>(GetController());
+		{
+			if (controllerAI)
+			{
+				controllerAI->SetPlayerInCloseRange(true);
+				controllerAI->SetPlayerActor(player);
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, TEXT("Player in close proximity"));
+			}
+		}
+	}
+}
+
+void AEnemyAIManager::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(OtherActor);
+	if (player)
+	{
+		AEnemyAIController* controllerAI = Cast<AEnemyAIController>(GetController());
+		{
+			if (controllerAI)
+			{
+				controllerAI->SetPlayerInCloseRange(false);
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Player has left proximity"));
+			}
+		}
 	}
 }
 

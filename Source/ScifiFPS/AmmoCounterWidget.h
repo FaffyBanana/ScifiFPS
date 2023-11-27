@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,7 +17,6 @@ class SCIFIFPS_API UAmmoCounterWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	/* Native Construct */
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable)
@@ -39,5 +37,5 @@ public:
 		class UTextBlock* AmmoTotalText;
 
 private:
-	AScifiFPSCharacter* Player;
+	AScifiFPSCharacter* PlayerCharacter;
 };

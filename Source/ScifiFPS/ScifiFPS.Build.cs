@@ -8,7 +8,22 @@ public class ScifiFPS : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "EnhancedInput", "GameplayTasks", "UMG", "Slate", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] 
+		{
+			"Core", 
+			"CoreUObject", 
+			"Engine", 
+			"InputCore",
+			"HeadMountedDisplay", 
+			"EnhancedInput", 
+			"GameplayTasks", 
+			"UMG", 
+			"Slate", 
+			"SlateCore",
+			"AIModule",
+			"GameplayTasks",
+			"NavigationSystem"
+		});
 
 		//PrivateDependencyModulesNames.AddRange(new string[] {  });
 	}

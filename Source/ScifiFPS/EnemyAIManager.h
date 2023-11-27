@@ -51,11 +51,7 @@ public:
 	void Death();
 
 public:
-	UPROPERTY(EditAnywhere, Category = "AI")
-	class UBehaviorTree* BehaviourTree;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
-	UHealthComponent* HealthComponent;
+	UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
 
 	UPROPERTY(EditAnywhere)
 	int32 ShotPercentage;
@@ -66,6 +62,17 @@ protected:
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	class UBehaviorTree* BehaviourTree;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	UHealthComponent* HealthComponent;
 private:
 	bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
 
@@ -73,5 +80,7 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollisionComponent;
+
+	
 
 };

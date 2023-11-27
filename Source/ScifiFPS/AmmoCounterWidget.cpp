@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AmmoCounterWidget.h"
 #include "Kismet/KismetTextLibrary.h"
 
@@ -11,16 +8,16 @@ void UAmmoCounterWidget::NativeConstruct()
 	AScifiFPSCharacter* player = Cast<AScifiFPSCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if(player)
 	{
-		Player = player;
+		PlayerCharacter = player;
 	}
 }
 
 FText UAmmoCounterWidget::GetAmmoText() const
 {
-	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetCurrentAmmoOfCurrentWeapon());
+	return UKismetTextLibrary::Conv_IntToText(PlayerCharacter->GetWeaponComponent()->GetCurrentAmmoOfCurrentWeapon());
 }
 
 FText UAmmoCounterWidget::GetTotalAmmoText() const
 {
-	return UKismetTextLibrary::Conv_IntToText(Player->GetWeaponComponent()->GetReserveAmmoOfCurrentWeapon());
+	return UKismetTextLibrary::Conv_IntToText(PlayerCharacter->GetWeaponComponent()->GetReserveAmmoOfCurrentWeapon());
 }

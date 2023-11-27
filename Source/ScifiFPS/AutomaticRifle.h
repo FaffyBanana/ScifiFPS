@@ -13,7 +13,7 @@
  *
  * Author: Jaber Ahmed
  *
- * Purpose: Assault rifle gun, derived from the base class Gun Base
+ * Purpose: Assault rifle gun
  *
  * References: N/A
  *
