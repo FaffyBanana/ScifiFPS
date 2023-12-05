@@ -7,6 +7,7 @@
 #include "TP_WeaponComponent.h"
 #include "HealthComponent.h"
 #include "Components/SphereComponent.h"
+#include "AIInterface.h"
 #include "EnemyAIManager.generated.h"
 
 /*****************************************************************************************************
@@ -24,10 +25,11 @@
  *
  * Change Log:
  * Date          Initials    Version     Comments
- * ----------    JA          -------     ----------------------------------------------
+ * ???/09/2023	 JA			 v1.0		 Quick and simple AI system
+ * 04/12/2023    JA          v2.0        Re-doing the AI system from the ground up
 *****************************************************************************************************/
 UCLASS()
-class SCIFIFPS_API AEnemyAIManager : public ACharacter
+class SCIFIFPS_API AEnemyAIManager : public ACharacter, public IAIInterface
 {
 	GENERATED_BODY()
 
@@ -44,28 +46,34 @@ public:
 	// Update how fast the enemy can walk/run
 	void UpdateMaxWalkSpeed(const float speed);
 
-	void ShootPlayer();
+	//void ShootPlayer();
 
 	UHealthComponent* GetHealthComponent() const;
 
-	void Death();
+	//void Death();
+
+	virtual void Attack() {};
+
+	virtual void WieldWeapon() {};
 
 public:
 	UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
 
-	UPROPERTY(EditAnywhere)
-	int32 ShotPercentage;
+	/* Return Weapon Component */
+	UTP_WeaponComponent* GetWeaponComponent() const { return WeaponComponent; }
+
+	/*UPROPERTY(EditAnywhere)
+	int32 ShotPercentage;*/
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+/*
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);*/
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "AI", meta = (AllowPrivateAccess = "true"))
@@ -73,13 +81,18 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
+
+	/** Weapon component */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UTP_WeaponComponent* WeaponComponent;
 private:
-	bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
+	//bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
 
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
-	USphereComponent* SphereCollisionComponent;
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereCollisionComponent;*/
+
 
 	
 

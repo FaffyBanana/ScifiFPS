@@ -14,5 +14,7 @@ class SCIFIFPS_API UChasePlayerTask : public UBTTaskNode
 {
 	GENERATED_BODY()
 
+private:
+
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& ownerComp, uint8* nodeMemory) override;
 };

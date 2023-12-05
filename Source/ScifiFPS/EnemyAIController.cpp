@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EnemyAIController.h"
 #include "EnemyAIManager.h"
 #include "ScifiFPSCharacter.h"
@@ -15,9 +12,10 @@ AEnemyAIController::AEnemyAIController()
 	BlackboardComp = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComponent"));
 
 	m_playerActor = "PlayerActor";
-	m_isPlayerInCloseRange = "IsPlayerInCloseRange";
+	//m_isPlayerInCloseRange = "IsPlayerInCloseRange";
 	m_hasLineOfSight = "HasLineOfSight";
 	m_patrolLocation = "PatrolLocation";
+	m_isWieldingWeapon = "IsWieldingWeapon";
 
 	PerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
@@ -48,25 +46,22 @@ void AEnemyAIController::BeginPlay()
 	PerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAIController::OnTargetPerceptionUpdated_Delegate);
 }
 
-UBlackboardComponent* AEnemyAIController::GetBlackboardComp() const
-{
-	return BlackboardComp;
-}
 
-void AEnemyAIController::SetPlayerInCloseRange(const bool boolean)
-{
-	if (!BlackboardComp)
-	{
-		return;
-	}
-
-	BlackboardComp->SetValueAsBool(m_isPlayerInCloseRange, boolean);
-}
+//void AEnemyAIController::SetPlayerInCloseRange(const bool boolean)
+//{
+//	if (!BlackboardComp)
+//	{
+//		return;
+//	}
+//
+//	BlackboardComp->SetValueAsBool(m_isPlayerInCloseRange, boolean);
+//}
 
 void AEnemyAIController::SetPlayerActor(AActor* PlayerActor)
 {
 	BlackboardComp->SetValueAsObject(m_playerActor, PlayerActor);
 
+	
 }
 
 void AEnemyAIController::OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAIStimulus Stimulus)
@@ -82,6 +77,15 @@ void AEnemyAIController::OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAISt
 	{
 		float m_lineOfSightTimer = 4.0f;
 		GetWorldTimerManager().SetTimer(m_enemyTimer, this, &AEnemyAIController::StartEnemyTimer, m_lineOfSightTimer);
+	}
+}
+
+void AEnemyAIController::SetFocusOnTarget()
+{
+	AActor* actor = Cast<AActor>(BlackboardComp->GetValueAsObject(m_playerActor));
+	if(actor)
+	{
+		SetFocus(actor);
 	}
 }
 

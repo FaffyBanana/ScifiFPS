@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -28,14 +26,17 @@ public:
 	
 	virtual void BeginPlay() override;
 	
-	FORCEINLINE UBlackboardComponent* GetBlackboardComp() const;
+	FORCEINLINE UBlackboardComponent* GetBlackboardComp() const { return BlackboardComp; };
 
-	void SetPlayerInCloseRange(const bool boolean);
+	//void SetPlayerInCloseRange(const bool boolean);
 
 	void SetPlayerActor(AActor* PlayerActor);
 
 	UFUNCTION()
 	void OnTargetPerceptionUpdated_Delegate(AActor* Actor, FAIStimulus Stimulus);
+
+	UFUNCTION()
+	void SetFocusOnTarget();
 
 private:
 	virtual void OnPossess(APawn* pawn) override;
@@ -43,6 +44,7 @@ private:
 	void OnUpdated();
 
 	void StartEnemyTimer();
+
 public:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	TObjectPtr<UAIPerceptionComponent> PerceptionComp = nullptr; // Perception Component
@@ -60,14 +62,16 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName m_playerActor; // Target
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	FName m_isPlayerInCloseRange;
+	/*UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName m_isPlayerInCloseRange;*/
 
 	//UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName m_hasLineOfSight; 
 
 	//UPROPERTY(EditDefaultsOnly, Category = "AI")
 	FName m_patrolLocation; // Target
+
+	FName m_isWieldingWeapon;
 
 
 	float m_sightRadius; // Sight radius
