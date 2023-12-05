@@ -34,6 +34,11 @@ void AEnemyAIManager::BeginPlay()
 	//SphereCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemyAIManager::OnOverlapEnd);
 }
 
+void AEnemyAIManager::SetIsAttacking(const bool boolean)
+{
+	m_isAttacking = boolean;
+}
+
 
 // Called every frame
 void AEnemyAIManager::Tick(float DeltaTime)
@@ -74,6 +79,14 @@ UHealthComponent* AEnemyAIManager::GetHealthComponent() const
 {
 	return HealthComponent;
 }
+
+void AEnemyAIManager::ChaseTarget()
+{
+	SetIsAttacking(false);
+	UpdateMaxWalkSpeed(600.0f);
+}
+
+
 //
 //void AEnemyAIManager::Death()
 //{

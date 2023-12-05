@@ -14,7 +14,7 @@ EBTNodeResult::Type UChasePlayerTask::ExecuteTask(UBehaviorTreeComponent& ownerC
         AEnemyAIManager* enemyManager = Cast<AEnemyAIManager>(enemyController->GetPawn());
         if (enemyManager)
         {
-            enemyManager->UpdateMaxWalkSpeed(600.0f);
+            enemyManager->ChaseTarget();
             return EBTNodeResult::Succeeded;
         }
     }

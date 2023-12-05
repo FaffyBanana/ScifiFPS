@@ -25,4 +25,5 @@ public:
 	virtual void Attack() = 0;
 
 	virtual void WieldWeapon() = 0;
+
 };

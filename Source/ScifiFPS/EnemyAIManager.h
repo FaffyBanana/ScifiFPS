@@ -52,15 +52,20 @@ public:
 
 	//void Death();
 
-	virtual void Attack() {};
+	virtual void Attack() {}
 
-	virtual void WieldWeapon() {};
+	virtual void WieldWeapon() {}
+
+	virtual void ChaseTarget();
 
 public:
 	UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
 
 	/* Return Weapon Component */
 	UTP_WeaponComponent* GetWeaponComponent() const { return WeaponComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsAttacking() const { return m_isAttacking; }
 
 	/*UPROPERTY(EditAnywhere)
 	int32 ShotPercentage;*/
@@ -75,6 +80,9 @@ protected:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);*/
 
+	UFUNCTION()
+	void SetIsAttacking(const bool boolean);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "AI", meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviourTree;
@@ -88,6 +96,7 @@ protected:
 private:
 	//bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
 
+	bool m_isAttacking;
 
 private:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
