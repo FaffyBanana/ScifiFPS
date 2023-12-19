@@ -17,6 +17,8 @@ AEnemyAIManager::AEnemyAIManager()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	WeaponComponent = CreateDefaultSubobject<UTP_WeaponComponent>(TEXT("WeaponComponent"));
+
+	GetCharacterMovement()->SetFixedBrakingDistance(false);
 }
 
 // Called when the game starts or when spawned
@@ -85,7 +87,6 @@ void AEnemyAIManager::ChaseTarget()
 	SetIsAttacking(false);
 	UpdateMaxWalkSpeed(600.0f);
 }
-
 
 //
 //void AEnemyAIManager::Death()

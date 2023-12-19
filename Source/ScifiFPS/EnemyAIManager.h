@@ -58,6 +58,8 @@ public:
 
 	virtual void ChaseTarget();
 
+	virtual APatrolRoute* GetPatrolRoute() override { return PatrolRoute; }
+
 public:
 	UBehaviorTree* GetBehaviourTree() const { return BehaviourTree; }
 
@@ -84,7 +86,7 @@ protected:
 	void SetIsAttacking(const bool boolean);
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, Category = AI, meta = (AllowPrivateAccess = "true"))
 	class UBehaviorTree* BehaviourTree;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
@@ -93,6 +95,10 @@ protected:
 	/** Weapon component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UTP_WeaponComponent* WeaponComponent;
+
+	UPROPERTY(EditAnywhere, Category = AI)
+	APatrolRoute* PatrolRoute;
+
 private:
 	//bool ShotHitChance(const uint32 percentage) const; // Chance of bullet hitting player
 
@@ -102,7 +108,7 @@ private:
 	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	USphereComponent* SphereCollisionComponent;*/
 
-
+	
 	
 
 };

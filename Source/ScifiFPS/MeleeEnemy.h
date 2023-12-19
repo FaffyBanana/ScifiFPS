@@ -20,6 +20,8 @@ public:
 
 	virtual void WieldWeapon() override;
 
+	virtual APatrolRoute* GetPatrolRoute() override;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* MeleeAnimation;

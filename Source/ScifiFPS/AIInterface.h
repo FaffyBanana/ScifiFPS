@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "PatrolRoute.h"
 #include "AIInterface.generated.h"
 
 // This class does not need to be modified.
@@ -26,4 +27,5 @@ public:
 
 	virtual void WieldWeapon() = 0;
 
+	virtual APatrolRoute* GetPatrolRoute() = 0;
 };

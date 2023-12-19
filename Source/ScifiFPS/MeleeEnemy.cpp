@@ -21,3 +21,8 @@ void AMeleeEnemy::WieldWeapon()
 {
 	
 }
+
+APatrolRoute* AMeleeEnemy::GetPatrolRoute()
+{
+	return PatrolRoute;
+}
